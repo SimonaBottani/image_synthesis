@@ -1,0 +1,291 @@
+import pandas as pd
+import os.path as path
+import torch
+import torchvision.transforms as transforms
+from torch.utils.data import Dataset
+import numpy as np
+
+FILENAME_TYPE = {'full': '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w',
+                 'cropped': '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w',
+                 'skull_stripped': '_space-Ixi549Space_desc-skullstripped_T1w'}
+
+class MinMaxNormalization(object):
+    """Normalizes a tensor between 0 and 1"""
+
+    def __call__(self, image):
+        return (image - image.min()) / (image.max() - image.min())
+
+
+def find_image_path(caps_dir, participant_id, session_id, preprocessing):
+    from os import path
+    if preprocessing == "t1-linear":
+        image_path = path.join(caps_dir, 'subjects', participant_id, session_id,
+                               't1_linear',
+                               participant_id + '_' + session_id +
+                               FILENAME_TYPE['cropped'] + '.nii.gz')
+    elif preprocessing == "t1-extensive":
+        image_path = path.join(caps_dir, 'subjects', participant_id, session_id,
+                               't1', 'spm', 'segmentation', 'normalized_space',
+                               participant_id + '_' + session_id +
+                               FILENAME_TYPE['skull_stripped'] + '.nii.gz')
+    else:
+        raise ValueError(
+            "Preprocessing %s must be in ['t1-linear', 't1-extensive']." %
+            preprocessing)
+
+    return image_path
+
+
+class ToTensor(object):
+    """Convert image type to Tensor and diagnosis to diagnosis code"""
+
+    def __call__(self, image):
+        np.nan_to_num(image, copy=False)
+        image = image.astype(float)
+
+        return torch.from_numpy(image[np.newaxis, :]).float()
+
+
+def get_transforms(mode, minmaxnormalization=True):
+    if mode in ["image", "patch", "roi"]:
+        if minmaxnormalization:
+            transformations = MinMaxNormalization()
+        else:
+            transformations = None
+    elif mode == "slice":
+        trg_size = (224, 224)
+        if minmaxnormalization:
+            transformations = transforms.Compose([MinMaxNormalization(),
+                                                  transforms.ToPILImage(),
+                                                  transforms.Resize(trg_size),
+                                                  transforms.ToTensor()])
+        else:
+            transformations = transforms.Compose([transforms.ToPILImage(),
+                                                  transforms.Resize(trg_size),
+                                                  transforms.ToTensor()])
+    else:
+        raise ValueError("Transforms for mode %s are not implemented." % mode)
+
+    return transformations
+
+
+def find_image_path(caps_dir, participant_id, session_id, preprocessing):
+    from os import path
+    if preprocessing == "t1-linear":
+        image_path = path.join(caps_dir, 'subjects', participant_id, session_id,
+                               't1_linear',
+                               participant_id + '_' + session_id +
+                               FILENAME_TYPE['cropped'] + '.nii.gz')
+    elif preprocessing == "t1-extensive":
+        image_path = path.join(caps_dir, 'subjects', participant_id, session_id,
+                               't1', 'spm', 'segmentation', 'normalized_space',
+                               participant_id + '_' + session_id +
+                               FILENAME_TYPE['skull_stripped'] + '.nii.gz')
+    else:
+        raise ValueError(
+            "Preprocessing %s must be in ['t1-linear', 't1-extensive']." %
+            preprocessing)
+
+    return image_path
+
+
+class MRIDataset(Dataset):
+    """Abstract class for all derived MRIDatasets."""
+
+    def __init__(self, caps_directory, data_file,
+                 preprocessing, transformations=None):
+        self.caps_directory = caps_directory
+        self.transformations = transformations
+        self.diagnosis_code = {
+            'tier_1': 0,
+            'tier_2': 1,
+            'tier_3': 2,
+            'tier_4': 3,
+            'gaudo_0': 0,
+            'gaudo_1': 1,
+            'mov_0': 0,
+            'mov_1': 1,
+            'mov_2': 2,
+            'noise_0': 0,
+            'noise_1': 1,
+            'noise_2': 2,
+            'cont_0': 0,
+            'cont_1': 1,
+            'cont_2': 2,
+            'unlabeled': -1}
+        self.preprocessing = preprocessing
+
+        if not hasattr(self, 'elem_index'):
+            raise ValueError(
+                "Child class of MRIDataset must set elem_index attribute.")
+        if not hasattr(self, 'mode'):
+            raise ValueError(
+                "Child class of MRIDataset must set mode attribute.")
+
+        # Check the format of the tsv file here
+        if isinstance(data_file, str):
+            self.df = pd.read_csv(data_file, sep='\t')
+        elif isinstance(data_file, pd.DataFrame):
+            self.df = data_file
+        else:
+            raise Exception('The argument data_file is not of correct type.')
+
+        mandatory_col = {"participant_id", "session_id", "diagnosis"}
+        if self.elem_index == "mixed":
+            mandatory_col.add("%s_id" % self.mode)
+
+        if not mandatory_col.issubset(set(self.df.columns.values)):
+            raise Exception("the data file is not in the correct format."
+                            "Columns should include %s" % mandatory_col)
+
+        self.elem_per_image = self.num_elem_per_image()
+
+    def __len__(self):
+        return len(self.df) * self.elem_per_image
+
+    def _get_path(self, participant, session, mode="image"):
+
+        if self.preprocessing == "t1-linear":
+            image_path = path.join(self.caps_directory, 'subjects', participant, session,
+                                   'deeplearning_prepare_data', '%s_based' % mode, 't1_linear',
+                                   participant + '_' + session
+                                   + FILENAME_TYPE['cropped'] + '.pt')
+        elif self.preprocessing == "t1-extensive":
+            image_path = path.join(self.caps_directory, 'subjects', participant, session,
+                                   'deeplearning_prepare_data', '%s_based' % mode, 't1_extensive',
+                                   participant + '_' + session
+                                   + FILENAME_TYPE['skull_stripped'] + '.pt')
+        else:
+            raise NotImplementedError(
+                "The path to preprocessing %s is not implemented" % self.preprocessing)
+
+        return image_path
+
+    def _get_meta_data(self, idx):
+        image_idx = idx // self.elem_per_image
+        participant = self.df.loc[image_idx, 'participant_id']
+        session = self.df.loc[image_idx, 'session_id']
+
+        if self.elem_index is None:
+            elem_idx = idx % self.elem_per_image
+        elif self.elem_index == "mixed":
+            elem_idx = self.df.loc[image_idx, '%s_id' % self.mode]
+        else:
+            elem_idx = self.elem_index
+
+        diagnosis = self.df.loc[image_idx, 'diagnosis']
+        label = self.diagnosis_code[diagnosis]
+
+        return participant, session, elem_idx, label
+
+    def _get_full_image(self):
+        from ..data.utils import find_image_path as get_nii_path
+        import nibabel as nib
+
+        participant_id = self.df.loc[0, 'participant_id']
+        session_id = self.df.loc[0, 'session_id']
+
+        try:
+            image_path = self._get_path(participant_id, session_id, "image")
+            image = torch.load(image_path)
+            image[image != image] = 0
+            image = (image - image.min()) / (image.max() - image.min())
+            print(torch.max(torch.reshape(image, (-1,))))
+            print(torch.isnan(image).any())
+
+        except FileNotFoundError:
+            image_path = get_nii_path(
+                self.caps_directory,
+                participant_id,
+                session_id,
+                preprocessing=self.preprocessing)
+            image_nii = nib.load(image_path)
+            image_np = image_nii.get_fdata()
+            image = ToTensor()(image_np)
+
+        return image
+
+    @abc.abstractmethod
+    def __getitem__(self, idx):
+        pass
+
+    @abc.abstractmethod
+    def num_elem_per_image(self):
+        pass
+
+
+class MRIDatasetImage(MRIDataset):
+    """Dataset of MRI organized in a CAPS folder."""
+
+    def __init__(self, caps_directory, data_file,
+                 preprocessing='t1-linear', transformations=None):
+        """
+        Args:
+            caps_directory (string): Directory of all the images.
+            data_file (string or DataFrame): Path to the tsv file or DataFrame containing the subject/session list.
+            preprocessing (string): Defines the path to the data in CAPS.
+            transformations (callable, optional): Optional transform to be applied on a sample.
+
+        """
+        self.elem_index = None
+        self.mode = "image"
+        super().__init__(caps_directory, data_file, preprocessing, transformations)
+
+    def __getitem__(self, idx):
+        participant, session, _, label = self._get_meta_data(idx)
+
+        image_path = self._get_path(participant, session, "image")
+        image = torch.load(image_path)
+
+        if self.transformations:
+            image = self.transformations(image)
+        sample = {'image': image, 'label': label, 'participant_id': participant, 'session_id': session,
+                  'image_path': image_path}
+
+        return sample
+
+    def num_elem_per_image(self):
+        return 1
+
+
+def load_data(train_val_path, diagnoses_list,
+              split, n_splits=None, baseline=True):
+
+    train_df = pd.DataFrame()
+    valid_df = pd.DataFrame()
+
+    if n_splits is None:
+        train_path = path.join(train_val_path, 'train')
+        valid_path = path.join(train_val_path, 'validation')
+
+    else:
+        train_path = path.join(train_val_path, 'train_splits-' + str(n_splits),
+                               'split-' + str(split))
+        valid_path = path.join(train_val_path, 'validation_splits-' + str(n_splits),
+                               'split-' + str(split))
+
+    print("Train", train_path)
+    print("Valid", valid_path)
+
+    for diagnosis in diagnoses_list:
+
+        if baseline:
+            train_diagnosis_path = path.join(
+                train_path, diagnosis + '_baseline.tsv')
+        else:
+            train_diagnosis_path = path.join(train_path, diagnosis + '.tsv')
+
+        valid_diagnosis_path = path.join(
+            valid_path, diagnosis + '_baseline.tsv')
+
+        train_diagnosis_df = pd.read_csv(train_diagnosis_path, sep='\t')
+        valid_diagnosis_df = pd.read_csv(valid_diagnosis_path, sep='\t')
+
+        train_df = pd.concat([train_df, train_diagnosis_df])
+        valid_df = pd.concat([valid_df, valid_diagnosis_df])
+
+    train_df.reset_index(inplace=True, drop=True)
+    valid_df.reset_index(inplace=True, drop=True)
+
+    return train_df, valid_df
+
