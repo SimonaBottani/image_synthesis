@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 
 # torchsummary and torchvision
-from torchsummary import summary
+#from torchsummary import summary
 from torchvision.utils import save_image
 
 # matplotlib stuff
