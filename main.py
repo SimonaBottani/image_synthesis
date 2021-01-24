@@ -66,11 +66,13 @@ for fi in fold_iterator:
         training_df,
         preprocessing,
         transformations=transformations)
+    print('done data train')
     data_valid = MRIDatasetImage(
         input_dir,
         training_df,
         preprocessing,
         transformations=transformations)
+    print('done data valid')
 
     # Use argument load to distinguish training and testing
 
@@ -84,6 +86,7 @@ for fi in fold_iterator:
         num_workers=num_workers,
         pin_memory=True
     )
+    print('loader train')
 
     valid_loader = DataLoader(
         data_valid,
@@ -92,6 +95,7 @@ for fi in fold_iterator:
         num_workers=num_workers,
         pin_memory=True
     )
+    print('loader valid')
 
 
 # Number of epochs
