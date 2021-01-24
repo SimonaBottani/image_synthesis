@@ -31,12 +31,12 @@ lr = 0.0002
 beta1 = 0.5
 beta2 = 0.999
 # Parameters for split
-n_splits = 2
+n_splits = 1
 split = None
 # Parameters of input
-tsv_path = '' ## to change ## for every patient i have gado and not gado. so 2 lines for a pair
-diagnoses = '' ## to change ## diagnoses will be gado, not_gado
-input_dir = '' ## to change
+tsv_path = '~/apprimage_simo/local_image_processing/image_synthesis/subjects_list/tier_1_labeled_paired_gaudo.tsv'
+diagnoses = ['gaudo_0', 'gaudo_1'] ## to change ## diagnoses will be gado, not_gado
+input_dir = '/export/home/cse180022/apprimage_simo/image_preprocessing_data/ds9_caps'
 # Create dataloaders
 batch_size = 2
 baseline = 'False'
@@ -81,7 +81,7 @@ for fi in fold_iterator:
         data_train,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=params.num_workers,
+        num_workers=num_workers,
         pin_memory=True
     )
 
@@ -98,5 +98,5 @@ for fi in fold_iterator:
 num_epoch = 3
 
 # Train the generator
-generator = train_cgan(train_loader, test_loader, num_epoch=3,
+generator = train_cgan(train_loader, valid_loader, num_epoch=3,
                             lr=lr, beta1=beta1, beta2=beta2)
