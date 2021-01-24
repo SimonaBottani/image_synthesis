@@ -98,5 +98,5 @@ for fi in fold_iterator:
 num_epoch = 3
 
 # Train the generator
-generator = train_cgan(train_loader, valid_loader, num_epoch=3,
-                            lr=lr, beta1=beta1, beta2=beta2)
+#generator = train_cgan(train_loader, valid_loader, num_epoch=3,
+#                            lr=lr, beta1=beta1, beta2=beta2)

@@ -166,6 +166,7 @@ class MRIDataset(Dataset):
         participant = self.df.loc[image_idx, 'participant_id']
         session = self.df.loc[image_idx, 'session_id']
 
+
         if self.elem_index is None:
             elem_idx = idx % self.elem_per_image
         elif self.elem_index == "mixed":
@@ -178,8 +179,27 @@ class MRIDataset(Dataset):
 
         return participant, session, elem_idx, label
 
+    def _get_meta_data_paired_images(self, idx):
+        image_idx = idx // self.elem_per_image
+        participant = self.df.loc[image_idx, 'participant_id']
+        session_1 = self.df.loc[image_idx, 'session_id_1']
+        session_2 = self.df.loc[image_idx, 'session_id_2']
+        label_1 = self.df.loc[image_idx, 'diagnosis_1']
+        label_2 = self.df.loc[image_idx, 'diagnosis_2']
+
+        if self.elem_index is None:
+            elem_idx = idx % self.elem_per_image
+        elif self.elem_index == "mixed":
+            elem_idx = self.df.loc[image_idx, '%s_id' % self.mode]
+        else:
+            elem_idx = self.elem_index
+
+
+        #label = self.diagnosis_code[diagnosis]
+
+        return participant, session_1, session_2, elem_idx, label_1, label_2
+
     def _get_full_image(self):
-        from ..data.utils import find_image_path as get_nii_path
         import nibabel as nib
 
         participant_id = self.df.loc[0, 'participant_id']
@@ -194,7 +214,7 @@ class MRIDataset(Dataset):
             print(torch.isnan(image).any())
 
         except FileNotFoundError:
-            image_path = get_nii_path(
+            image_path = find_image_path(
                 self.caps_directory,
                 participant_id,
                 session_id,
@@ -232,15 +252,26 @@ class MRIDatasetImage(MRIDataset):
         super().__init__(caps_directory, data_file, preprocessing, transformations)
 
     def __getitem__(self, idx):
-        participant, session, _, label = self._get_meta_data(idx)
+        participant, session_1, session_2, _, label_1, label_2 = self._get_meta_data_paired_images(idx)
 
-        image_path = self._get_path(participant, session, "image")
-        image = torch.load(image_path)
+        image_path_1 = self._get_path(participant, session_1, "image")
+        image_1 = torch.load(image_path_1)
+
+        image_path_2 = self._get_path(participant, session_2, "image")
+        image_2 = torch.load(image_path_2)
 
         if self.transformations:
-            image = self.transformations(image)
-        sample = {'image': image, 'label': label, 'participant_id': participant, 'session_id': session,
-                  'image_path': image_path}
+            image_1 = self.transformations(image_1)
+            image_2 = self.transformations(image_2)
+
+        sample = {'image_1': image_1, 'label_1': label_1,
+                  'participant_id': participant,
+                  'session_id_1': session_1,
+                  'image_path_1': image_path_1,
+                  'image_2': image_2, 'label_2': label_2,
+                  'session_id_2': session_2,
+                  'image_path_2': image_path_2}
+
 
         return sample
 
