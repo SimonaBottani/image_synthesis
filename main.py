@@ -34,7 +34,7 @@ beta2 = 0.999
 n_splits = 1
 split = None
 # Parameters of input
-tsv_path = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/subjects_list/tier_1_labeled_paired_gaudo.tsv'
+tsv_path = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/tsv_files'
 diagnoses = ['gaudo_1'] ## to change ## diagnoses will be gado, not_gado
 input_dir = '/export/home/cse180022/apprimage_simo/image_preprocessing_data/ds9_caps'
 # Create dataloaders
