@@ -31,7 +31,7 @@ lr = 0.0002
 beta1 = 0.5
 beta2 = 0.999
 # Parameters for split
-n_splits = 1
+n_splits = 2
 split = None
 # Parameters of input
 tsv_path = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/tsv_files'
