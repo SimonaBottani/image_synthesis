@@ -131,13 +131,13 @@ class MRIDataset(Dataset):
         else:
             raise Exception('The argument data_file is not of correct type.')
 
-        mandatory_col = {"participant_id", "session_id", "diagnosis"}
-        if self.elem_index == "mixed":
-            mandatory_col.add("%s_id" % self.mode)
+        mandatory_col = {"participant_id", "session_id", "diagnosis_1"}
+        #if self.elem_index == "mixed":
+        #    mandatory_col.add("%s_id" % self.mode)
 
-        if not mandatory_col.issubset(set(self.df.columns.values)):
-            raise Exception("the data file is not in the correct format."
-                            "Columns should include %s" % mandatory_col)
+        #if not mandatory_col.issubset(set(self.df.columns.values)):
+        #    raise Exception("the data file is not in the correct format."
+        #                    "Columns should include %s" % mandatory_col)
 
         self.elem_per_image = self.num_elem_per_image()
 
