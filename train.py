@@ -94,10 +94,10 @@ def train_cgan(train_loader, test_loader, output_results,
 
         print('i have generated my samples and I save it:')
         print(fake_2.shape)
-        print('image_path_1')
-        print('participant_id')
-        print('session_id')
-        
+        print(img['image_path_1'])
+        print(img['participant_id'])
+        print(img['session_id'])
+
 
 
 
