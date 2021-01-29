@@ -97,7 +97,7 @@ def train_cgan(train_loader, test_loader, output_results,
         print(fake_2.shape)
         print(imgs['image_path_1'])
         print(imgs['participant_id'])
-        print(imgs['session_id'])
+        print(imgs['session_id_1'])
         img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id_1'][0], imgs['session_id_1'][0],
                                  't1_linear',
                                  imgs['participant_id_1'][0] + '_' + imgs['session_id_1'][0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
