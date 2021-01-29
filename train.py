@@ -102,7 +102,7 @@ def train_cgan(train_loader, test_loader, output_results,
                                  't1_linear',
                                  imgs['participant_id'][0] + '_' + imgs['session_id_1'][0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
 
-        header = nib.load(img_nifti).header()
+        header = nib.load(img_nifti).header
         fake_2_example = nib.Nifti1Image(fake_2[0],header=header)
         if not os.path.exists(os.path.join(output_results, 'epoch-'+epoch)):
             os.makedirs(os.path.join(output_results, 'epoch-'+epoch))
