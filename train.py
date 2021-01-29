@@ -24,6 +24,10 @@ import sys
 import time
 from models import GeneratorUNet, Discriminator
 
+# Nibabel
+import nibabel as nib
+
+
 
 def train_cgan(train_loader, test_loader, output_results,
                num_epoch=500,
@@ -87,9 +91,16 @@ def train_cgan(train_loader, test_loader, output_results,
 
 
         fake_2 = generator(real_1)
+
         print('i have generated my samples and I save it:')
         print(fake_2.shape)
+        print('image_path_1')
+        print('participant_id')
+        print('session_id')
         
+
+
+
         #img_sample = torch.cat((real_1.data, fake_2.data, real_2.data), -2)
         #save_image(img_sample, os.path.join(output_results, 'cgan/epoch-' + epoch + ".nii.gz"),
         #           nrow=5, normalize=True)
