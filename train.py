@@ -87,9 +87,12 @@ def train_cgan(train_loader, test_loader, output_results,
 
 
         fake_2 = generator(real_1)
-        img_sample = torch.cat((real_1.data, fake_2.data, real_2.data), -2)
-        save_image(img_sample, os.path.join(output_results, 'cgan/epoch-' + epoch + ".nii.gz"),
-                   nrow=5, normalize=True)
+        print('i have generated my samples and I save it:')
+        print(fake_2.shape)
+        
+        #img_sample = torch.cat((real_1.data, fake_2.data, real_2.data), -2)
+        #save_image(img_sample, os.path.join(output_results, 'cgan/epoch-' + epoch + ".nii.gz"),
+        #           nrow=5, normalize=True)
 
     # ----------
     #  Training
