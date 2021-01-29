@@ -136,11 +136,17 @@ class GeneratorUNet(nn.Module):
 
         u1 = self.up1(d5)
         print(u1.shape)
-        print('input for skip connection')
+        print('input for skip connection U2')
         print(u1.shape)
         print(d4.shape)
         u2 = self.up2(u1, d4)
+        print('input for skip connection U3')
+        print(u2.shape)
+        print(d3.shape)
         u3 = self.up3(u2, d3)
+        print('input for skip connection U4')
+        print(u3.shape)
+        print(d2.shape)
         u4 = self.up4(u3, d2)
 
         return self.final(u4, d1)
