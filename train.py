@@ -30,6 +30,7 @@ import nibabel as nib
 
 
 def train_cgan(train_loader, test_loader, output_results,
+               caps_dir,
                num_epoch=500,
                lr=0.0001, beta1=0.9, beta2=0.999):
     """Train a conditional GAN.
@@ -97,8 +98,16 @@ def train_cgan(train_loader, test_loader, output_results,
         print(imgs['image_path_1'])
         print(imgs['participant_id'])
         print(imgs['session_id'])
+        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id_1'][0], imgs['session_id_1'][0],
+                                 't1_linear',
+                                 imgs['participant_id_1'][0] + '_' + imgs['session_id_1'][0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
 
-
+        header = nib.load(img_nifti).header()
+        fake_2_example = nib.Nifti1Image(fake_2[0],header=header)
+        if not os.path.exists(os.path.join(output_results, 'epoch-'+epoch)):
+            os.makedirs(os.path.join(output_results, 'epoch-'+epoch))
+        fake_2_example.to_filename(os.path.join(output_results, 'epoch-'+epoch,
+            imgs['participant_id_1'][0] + '_' + imgs['session_id_1'][0] + '_reconstructed.nii.gz'))
 
 
         #img_sample = torch.cat((real_1.data, fake_2.data, real_2.data), -2)
