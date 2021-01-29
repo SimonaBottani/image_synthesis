@@ -121,6 +121,7 @@ class GeneratorUNet(nn.Module):
     def forward(self, x):
         #d1 = self.down1(x)
         #d2 = self.down2(d1)
+        print(x.shape)
         d3 = self.down3(x)
         d4 = self.down4(d3)
         d5 = self.down5(d4)
