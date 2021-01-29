@@ -37,6 +37,7 @@ split = None
 tsv_path = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/tsv_files'
 diagnoses = ['gaudo_1'] ## to change ## diagnoses will be gado, not_gado
 input_dir = '/export/home/cse180022/apprimage_simo/image_preprocessing_data/ds9_caps'
+output_results = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/cgan'
 # Create dataloaders
 batch_size = 2
 baseline = 'False'
@@ -96,8 +97,8 @@ for fi in fold_iterator:
 
 
 # Number of epochs
-num_epoch = 3
+num_epoch = 2
 
 # Train the generator
-generator = train_cgan(train_loader, valid_loader, num_epoch=3,
+generator = train_cgan(train_loader, valid_loader,output_results,num_epoch,
                             lr=lr, beta1=beta1, beta2=beta2)
