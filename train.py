@@ -104,9 +104,9 @@ def train_cgan(train_loader, test_loader, output_results,
 
         header = nib.load(img_nifti).header
         affine = nib.load(img_nifti).affine
-        fake_2_example = fake_2.numpy()
-        print('fake 2 example shape')
-        fake_2_example = nib.Nifti1Image(fake_2_example[2:], affine=affine, header=header)
+        #fake_2_example = fake_2.numpy()
+        #print('fake 2 example shape')
+        fake_2_example = nib.Nifti1Image(fake_2[0,0,:,:,:], affine=affine, header=header)
         if not os.path.exists(os.path.join(output_results, 'epoch-'+epoch)):
             os.makedirs(os.path.join(output_results, 'epoch-'+epoch))
         fake_2_example.to_filename(os.path.join(output_results, 'epoch-'+epoch,
