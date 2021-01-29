@@ -80,6 +80,12 @@ def train_cgan(train_loader, test_loader, output_results,
         imgs = next(iter(test_loader))
         real_1 = Variable(imgs["image_1"].type(Tensor))
         real_2 = Variable(imgs["image_2"].type(Tensor))
+
+        ### reshape image
+        real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+
+        
         fake_2 = generator(real_1)
         img_sample = torch.cat((real_1.data, fake_2.data, real_2.data), -2)
         save_image(img_sample, os.path.join(output_results, 'cgan/epoch-' + epoch + ".nii.gz"),
@@ -102,6 +108,10 @@ def train_cgan(train_loader, test_loader, output_results,
             real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
             real_2[real_2 != real_2] = 0
             real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
+
+            ### Reshape input ###
+            real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
+            real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
 
 
             # Create labels

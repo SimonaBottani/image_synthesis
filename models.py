@@ -119,7 +119,6 @@ class GeneratorUNet(nn.Module):
         self.final = FinalLayer(128, 1)
 
     def forward(self, x):
-        x = F.interpolate(x, size=(64, 64, 64), mode='trilinear', align_corners=False)
         print(x.shape)
         print('down')
         d1 = self.down1(x)
