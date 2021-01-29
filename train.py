@@ -25,7 +25,8 @@ import time
 from models import GeneratorUNet, Discriminator
 
 
-def train_cgan(train_loader, test_loader, num_epoch=500,
+def train_cgan(train_loader, test_loader, output_results,
+               num_epoch=500,
                lr=0.0001, beta1=0.9, beta2=0.999):
     """Train a conditional GAN.
 
@@ -48,8 +49,8 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
     Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
     # Output folder
-    if not os.path.exists("./images/cgan"):
-        os.makedirs("./images/cgan")
+    if not os.path.exists(os.path.join(output_results, 'cgan')):
+        os.makedirs(os.path.join(output_results, 'cgan'))
 
     # Loss functions
     criterion_GAN = torch.nn.BCEWithLogitsLoss()   # To complete. A loss adapted to binary classification like torch.nn.BCEWithLogitsLoss
@@ -77,11 +78,11 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
     def sample_images(epoch):
         """Saves a generated sample from the validation set"""
         imgs = next(iter(test_loader))
-        real_t1 = Variable(imgs["T1"].type(Tensor))
-        real_t2 = Variable(imgs["T2"].type(Tensor))
-        fake_t2 = generator(real_t1)
-        img_sample = torch.cat((real_t1.data, fake_t2.data, real_t2.data), -2)
-        save_image(img_sample, f"./images/cgan/epoch-{epoch}.png",
+        real_1 = Variable(imgs["image_1"].type(Tensor))
+        real_2 = Variable(imgs["image_2"].type(Tensor))
+        fake_2 = generator(real_1)
+        img_sample = torch.cat((real_1.data, fake_2.data, real_2.data), -2)
+        save_image(img_sample, os.path.join(output_results, 'cgan/epoch-' + epoch + ".nii.gz"),
                    nrow=5, normalize=True)
 
     # ----------
@@ -91,16 +92,22 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
     prev_time = time.time()
 
     for epoch in range(num_epoch):
-        for i, batch in enumerate(train_loader):
+        for i, data in enumerate(train_loader, 0):
 
             # Inputs T1-w and T2-w
-            real_t1 = Variable(batch["T1"].type(Tensor))
-            real_t2 = Variable(batch["T2"].type(Tensor))
+            real_1 = data["image_1"].type(Tensor)
+            real_2 = data["image_2"].type(Tensor)
+
+            real_1[real_1 != real_1] = 0
+            real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
+            real_2[real_2 != real_2] = 0
+            real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
+
 
             # Create labels
-            valid = Variable(Tensor(np.ones((real_t2.size(0), 1, 1, 1))),
+            valid = Variable(Tensor(np.ones((real_2.size(0), 1, 1, 1))),
                              requires_grad=False)
-            fake = Variable(Tensor(np.zeros((real_t2.size(0), 1, 1, 1))),
+            fake = Variable(Tensor(np.zeros((real_2.size(0), 1, 1, 1))),
                             requires_grad=False)
 
             # -----------------
@@ -109,12 +116,12 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
             optimizer_generator.zero_grad()
 
             # GAN loss
-            fake_t2 =  generator(real_t1)  # To complete
-            pred_fake = discriminator(fake_t2, real_t1)   # To complete
-            loss_GAN = criterion_GAN(pred_fake, valid)   # To complete
+            fake_2 =  generator(real_1)  # To complete
+            pred_fake = discriminator(fake_2, real_1)
+            loss_GAN = criterion_GAN(pred_fake, valid)
 
             # L1 loss
-            loss_pixel = criterion_pixelwise(fake_t2, real_t2)   # To complete
+            loss_pixel = criterion_pixelwise(fake_2, real_2)
 
             # Total loss
             loss_generator = lambda_GAN * loss_GAN + lambda_pixel * loss_pixel
@@ -130,11 +137,11 @@ def train_cgan(train_loader, test_loader, num_epoch=500,
             optimizer_discriminator.zero_grad()
 
             # Real loss
-            pred_real = discriminator(real_t2, real_t1)   # To complete
+            pred_real = discriminator(real_2, real_1)   # To complete
             loss_real =  criterion_GAN(pred_real, valid)  # To complete
 
             # Fake loss
-            pred_fake = discriminator(fake_t2.detach(), real_t1)   # To complete
+            pred_fake = discriminator(fake_2.detach(), real_1)   # To complete
             loss_fake = criterion_GAN(pred_fake, fake)   # To complete
 
             # Total loss

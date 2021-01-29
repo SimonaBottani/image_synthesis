@@ -44,7 +44,7 @@ baseline = 'False'
 mode = 'image'
 preprocessing = 't1-linear'
 num_workers = 2 #n_proc
-print('done import')
+
 
 
 transformations = get_transforms(mode, minmaxnormalization=True)
@@ -67,13 +67,11 @@ for fi in fold_iterator:
         training_df,
         preprocessing,
         transformations=transformations)
-    print('done data train')
     data_valid = MRIDatasetImage(
         input_dir,
         training_df,
         preprocessing,
         transformations=transformations)
-    print('done data valid')
 
     # Use argument load to distinguish training and testing
 
@@ -87,7 +85,6 @@ for fi in fold_iterator:
         num_workers=num_workers,
         pin_memory=True
     )
-    print('loader train')
 
     valid_loader = DataLoader(
         data_valid,
@@ -96,12 +93,11 @@ for fi in fold_iterator:
         num_workers=num_workers,
         pin_memory=True
     )
-    print('loader valid')
 
 
 # Number of epochs
 num_epoch = 3
 
 # Train the generator
-#generator = train_cgan(train_loader, valid_loader, num_epoch=3,
-#                            lr=lr, beta1=beta1, beta2=beta2)
+generator = train_cgan(train_loader, valid_loader, num_epoch=3,
+                            lr=lr, beta1=beta1, beta2=beta2)
