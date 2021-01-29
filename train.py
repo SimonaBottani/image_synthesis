@@ -85,7 +85,7 @@ def train_cgan(train_loader, test_loader, output_results,
         real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
         real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
 
-        
+
         fake_2 = generator(real_1)
         img_sample = torch.cat((real_1.data, fake_2.data, real_2.data), -2)
         save_image(img_sample, os.path.join(output_results, 'cgan/epoch-' + epoch + ".nii.gz"),
@@ -115,9 +115,9 @@ def train_cgan(train_loader, test_loader, output_results,
 
 
             # Create labels
-            valid = Variable(Tensor(np.ones((real_2.size(0), 1, 1, 1))),
+            valid = Variable(Tensor(np.ones((real_2.size(0), 1, 1, 1, 1))),
                              requires_grad=False)
-            fake = Variable(Tensor(np.zeros((real_2.size(0), 1, 1, 1))),
+            fake = Variable(Tensor(np.zeros((real_2.size(0), 1, 1, 1, 1))),
                             requires_grad=False)
 
             # -----------------
