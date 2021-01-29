@@ -105,9 +105,9 @@ class GeneratorUNet(nn.Module):
     """
     def __init__(self, in_channels=1, out_channels=1):
         super(GeneratorUNet, self).__init__()
-        self.down1 = UNetDown(in_channels, 64)
-        self.down2 = UNetDown(64, 128)
-        self.down3 = UNetDown(128, 256)
+        #self.down1 = UNetDown(in_channels, 64)
+        #self.down2 = UNetDown(64, 128)
+        self.down3 = UNetDown(in_channels, 256)
         self.down4 = UNetDown(256, 512)
         self.down5 = UNetDown(512, 512)
 
@@ -119,18 +119,18 @@ class GeneratorUNet(nn.Module):
         self.final = FinalLayer(128, 1)
 
     def forward(self, x):
-        d1 = self.down1(x)
-        d2 = self.down2(d1)
-        d3 = self.down3(d2)
+        #d1 = self.down1(x)
+        #d2 = self.down2(d1)
+        d3 = self.down3(x)
         d4 = self.down4(d3)
         d5 = self.down5(d4)
 
         u1 = self.up1(d5)
         u2 = self.up2(u1, d4)
         u3 = self.up3(u2, d3)
-        u4 = self.up4(u3, d2)
+        #u4 = self.up4(u3, d2)
 
-        return self.final(u4, d1)
+        return self.final(u3, d3)
 
 
 ################## Discriminator ###########################
