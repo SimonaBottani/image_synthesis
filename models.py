@@ -107,7 +107,7 @@ class GeneratorUNet(nn.Module):
         super(GeneratorUNet, self).__init__()
         self.down1 = UNetDown(in_channels, 64)
         self.down2 = UNetDown(64, 128)
-        self.down3 = UNetDown(in_channels, 256)
+        self.down3 = UNetDown(128, 256)
         self.down4 = UNetDown(256, 512)
         self.down5 = UNetDown(512, 512)
 
