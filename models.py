@@ -126,7 +126,7 @@ class GeneratorUNet(nn.Module):
         print(d1.shape)
         d2 = self.down2(d1)
         print(d2.shape)
-        d3 = self.down3(x)
+        d3 = self.down3(d2)
         print(d3.shape)
         d4 = self.down4(d3)
         print(d4.shape)
