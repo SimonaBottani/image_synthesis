@@ -97,7 +97,7 @@ for fi in fold_iterator:
 
 
 # Number of epochs
-num_epoch = 2
+num_epoch = 100
 
 # Train the generator
 generator = train_cgan(train_loader, valid_loader,output_results, input_dir,

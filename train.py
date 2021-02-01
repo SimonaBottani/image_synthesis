@@ -151,8 +151,6 @@ def train_cgan(train_loader, test_loader, output_results,
 
             # GAN loss
             fake_2 =  generator(real_1)  # To complete
-            print('fake 2')
-            print(fake_2.shape)
             pred_fake = discriminator(fake_2, real_1)
             loss_GAN = criterion_GAN(pred_fake, valid)
 
