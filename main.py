@@ -27,7 +27,7 @@ from utils import *
 
 
 # Parameters for Adam optimizer
-lr = 0.0002
+lr = 0.0001
 beta1 = 0.5
 beta2 = 0.999
 # Parameters for split
