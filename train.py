@@ -40,12 +40,16 @@ def train_cgan(train_loader, test_loader, output_results,
         test_loader: (DataLoader) a DataLoader wrapping a the test dataset
         num_epoch: (int) number of epochs performed during training
         lr: (float) learning rate of the discriminator and generator Adam optimizers
+        lr: (float) learning rate of the discriminator and generator Adam optimizers
         beta1: (float) beta1 coefficient of the discriminator and generator Adam optimizers
         beta2: (float) beta1 coefficient of the discriminator and generator Adam optimizers
 
     Returns:
         generator: (nn.Module) the trained generator
     """
+
+    columns = ['epoch', 'batch', 'loss_discriminator', 'loss_generator', 'loss_pixel', 'loss_GAN']
+    filename = os.path.join(output_results, 'training.tsv')
 
     cuda = True if torch.cuda.is_available() else False
     print(f"Using cuda device: {cuda}")  # check if GPU is used
@@ -93,11 +97,6 @@ def train_cgan(train_loader, test_loader, output_results,
 
         fake_2 = generator(real_1)
 
-        print('i have generated my samples and I save it:')
-        print(fake_2.shape)
-        print(imgs['image_path_1'])
-        print(imgs['participant_id'])
-        print(imgs['session_id_1'])
         img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_1'][0],
                                  't1_linear',
                                  imgs['participant_id'][0] + '_' + imgs['session_id_1'][0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
@@ -105,7 +104,6 @@ def train_cgan(train_loader, test_loader, output_results,
         header = nib.load(img_nifti).header
         affine = nib.load(img_nifti).affine
         fake_2 = fake_2.detach().cpu().numpy()
-        #print('fake 2 example shape')
         fake_2_example = nib.Nifti1Image(fake_2[0,0,:,:,:], affine=affine, header=header)
         if not os.path.exists(os.path.join(output_results, 'epoch-' + str(epoch))):
             os.makedirs(os.path.join(output_results, 'epoch-' + str(epoch)))
@@ -218,6 +216,19 @@ def train_cgan(train_loader, test_loader, output_results,
             )
 
         # Save images at the end of each epoch
+
+        columns = ['epoch', 'batch', 'loss_discriminator', 'loss_generator', 'loss_pixel', 'loss_GAN']
+        row = np.array(
+            [epoch + 1, i, loss_discriminator.item(), loss_generator.item(),
+            loss_pixel.item(),
+             loss_GAN.item()]
+        ).reshape(1, -1)
+        row_df = pd.DataFrame(row, columns=columns)
+        with open(filename, 'a') as f:
+            row_df.to_csv(f, header=False, index=False, sep='\t')
+
         sample_images(epoch)
 
     return generator
+
+
