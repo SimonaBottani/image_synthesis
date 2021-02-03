@@ -25,6 +25,7 @@ import sys
 import time
 from train import train_cgan
 from utils import *
+from evaluation import *
 
 
 parser = argparse.ArgumentParser(description='image synthesis')
@@ -112,29 +113,6 @@ mode = 'image'
 preprocessing = 't1-linear'
 num_workers = 2
 
-# Parameters for Adam optimizer
-#lr = 0.0001
-#beta1 = 0.5
-#beta2 = 0.999
-# Parameters for split
-#n_splits = 2
-#split = None
-# Parameters of input
-#tsv_path = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/tsv_files'
-#diagnoses = ['gaudo_1'] ## to change ## diagnoses will be gado, not_gado
-#input_dir = '/export/home/cse180022/apprimage_simo/image_preprocessing_data/ds9_caps'
-#output_results = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/cgan'
-# Create dataloaders
-#batch_size = 2
-#baseline = 'False'
-#num_epoch = 500
-# Parameter for operations on dataloader
-#mode = 'image'
-#preprocessing = 't1-linear'
-#num_workers = 2 #n_proc
-
-
-
 transformations = get_transforms(mode, minmaxnormalization=True)
 
 
@@ -191,3 +169,9 @@ for fi in fold_iterator:
     generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
                        num_epoch,
                             lr=lr, beta1=beta1, beta2=beta2)
+
+
+    evaluate_generator(generator, train_loader, output_results_fold, modality='train')
+    evaluate_generator(generator, valid_loader, output_results_fold, modality='valid')
+
+
