@@ -4,6 +4,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 from torch.autograd import Variable
+import argparse
 
 # torchsummary and torchvision
 #from torchsummary import summary
@@ -26,36 +27,117 @@ from train import train_cgan
 from utils import *
 
 
-# Parameters for Adam optimizer
-lr = 0.0001
-beta1 = 0.5
-beta2 = 0.999
-# Parameters for split
-n_splits = 2
-split = None
-# Parameters of input
-tsv_path = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/tsv_files'
-diagnoses = ['gaudo_1'] ## to change ## diagnoses will be gado, not_gado
-input_dir = '/export/home/cse180022/apprimage_simo/image_preprocessing_data/ds9_caps'
-output_results = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/cgan'
-# Create dataloaders
-batch_size = 2
+parser = argparse.ArgumentParser(description='image synthesis')
+
+parser.add_argument(
+        'caps_dir',
+        help='Data using CAPS structure.',
+        default=None
+    )
+parser.add_argument(
+        'output_results',
+        help='Where results will be saved',
+        default=None
+    )
+
+parser.add_argument(
+        'tsv_path',
+        help='TSV path with subjects/sessions to use for data generation.',
+        default=None
+    )
+
+parser.add_argument(
+        'n_epoch',
+        type=int,
+        default=200,
+        help='number of epoch'
+    )
+
+parser.add_argument(
+        'lr',
+        type=float,
+        default=0.0001,
+        help='learning_rate'
+    )
+
+parser.add_argument(
+    'beta1',
+    type=float,
+    default=0.5,
+    help='beta1 for Adam Optimizer'
+)
+
+parser.add_argument(
+    'beta2',
+    type=float,
+    default=0.999,
+    help='beta1 for Adam Optimizer'
+)
+
+parser.add_argument(
+    'n_splits',
+    type=int,
+    help='number of CV'
+)
+
+
+parser.add_argument(
+    'batch_size',
+    type=int,
+    default=2,
+    help='batch_size'
+)
+
+
+args = parser.parse_args()
+
+input_dir = args.caps_dir
+output_results = args.output_results
+tsv_path = args.tsv_path
+lr = args.lr
+beta1 = args.beta1
+beta2 = args.beta2
+n_splits = args.n_splits
+batch_size = args.batch_size
+num_epoch = args.n_epoch
+diagnoses = ['gaudo_1']
 baseline = 'False'
-# Parameter for operations on dataloader
+split = None
 mode = 'image'
 preprocessing = 't1-linear'
-num_workers = 2 #n_proc
+num_workers = 2
+
+# Parameters for Adam optimizer
+#lr = 0.0001
+#beta1 = 0.5
+#beta2 = 0.999
+# Parameters for split
+#n_splits = 2
+#split = None
+# Parameters of input
+#tsv_path = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/tsv_files'
+#diagnoses = ['gaudo_1'] ## to change ## diagnoses will be gado, not_gado
+#input_dir = '/export/home/cse180022/apprimage_simo/image_preprocessing_data/ds9_caps'
+#output_results = '/export/home/cse180022/apprimage_simo/local_image_processing/image_synthesis/output_results/cgan'
+# Create dataloaders
+#batch_size = 2
+#baseline = 'False'
+#num_epoch = 500
+# Parameter for operations on dataloader
+#mode = 'image'
+#preprocessing = 't1-linear'
+#num_workers = 2 #n_proc
 
 
 
 transformations = get_transforms(mode, minmaxnormalization=True)
 
-if split is None:
-    fold_iterator = range(n_splits)
-else:
-    fold_iterator = split
+
+fold_iterator = range(n_splits)
+
 
 for fi in fold_iterator:
+
     training_df, valid_df = load_data(
         tsv_path,
         diagnoses,
@@ -96,10 +178,11 @@ for fi in fold_iterator:
     )
 
 
-# Number of epochs
-num_epoch = 500
 
-# Train the generator
-generator = train_cgan(train_loader, valid_loader,output_results, input_dir,
+    output_results_fold = os.path.join(output_results, 'fold-' + str(fi))
+    if not os.path.exists(output_results_fold):
+        os.makedirs(output_results_fold)
+    # Train the generator
+    generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
                        num_epoch,
                             lr=lr, beta1=beta1, beta2=beta2)
