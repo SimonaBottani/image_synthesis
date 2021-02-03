@@ -91,6 +91,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+## write command line arguments on json
+commandline = parser.parse_known_args()
+commandline_to_json(commandline)
+
+## read command line arguments
 input_dir = args.caps_dir
 output_results = args.output_results
 tsv_path = args.tsv_path

@@ -10,6 +10,35 @@ FILENAME_TYPE = {'full': '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w',
                  'cropped': '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w',
                  'skull_stripped': '_space-Ixi549Space_desc-skullstripped_T1w'}
 
+
+def commandline_to_json(commandline):
+    """
+    This is a function to write the python argparse object into a json file.
+    This helps for DL when searching for hyperparameters
+
+    :param commandline: a tuple contain the output of
+                        `parser.parse_known_args()`
+
+    :return:
+    """
+    import json
+    import os
+
+    commandline_arg_dic = vars(commandline[0])
+    commandline_arg_dic['unknown_arg'] = commandline[1]
+
+    output_dir = commandline_arg_dic['output_results']
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # save to json file
+    json = json.dumps(commandline_arg_dic, skipkeys=True, indent=4)
+    print("Path of json file:", os.path.join(output_dir, "commandline.json"))
+    f = open(os.path.join(output_dir, "commandline.json"), "w")
+    f.write(json)
+    f.close()
+
+
 class MinMaxNormalization(object):
     """Normalizes a tensor between 0 and 1"""
 
