@@ -47,42 +47,42 @@ parser.add_argument(
     )
 
 parser.add_argument(
-        'n_epoch',
+        '--n_epoch',
         type=int,
         default=200,
         help='number of epoch'
     )
 
 parser.add_argument(
-        'lr',
+        '--lr',
         type=float,
         default=0.0001,
         help='learning_rate'
     )
 
 parser.add_argument(
-    'beta1',
+    '--beta1',
     type=float,
     default=0.5,
     help='beta1 for Adam Optimizer'
 )
 
 parser.add_argument(
-    'beta2',
+    '--beta2',
     type=float,
     default=0.999,
     help='beta1 for Adam Optimizer'
 )
 
 parser.add_argument(
-    'n_splits',
+    '--n_splits',
     type=int,
     help='number of CV'
 )
 
 
 parser.add_argument(
-    'batch_size',
+    '--batch_size',
     type=int,
     default=2,
     help='batch_size'
