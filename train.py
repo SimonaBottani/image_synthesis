@@ -94,6 +94,10 @@ def train_cgan(train_loader, test_loader, output_results,
         real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
         real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
 
+        real_1[real_1 != real_1] = 0
+        real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
+        real_2[real_2 != real_2] = 0
+        real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
         fake_2 = generator(real_1)
 
