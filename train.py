@@ -22,7 +22,7 @@ import datetime
 import os
 import sys
 import time
-from models import GeneratorUNet, Discriminator
+from models import GeneratorUNet, Discriminator, DiscriminatorCycle
 
 # Nibabel
 import nibabel as nib
@@ -385,3 +385,250 @@ def train_generator(train_loader, test_loader, output_results,
     return generator
 
 
+
+def train_cyclegan(train_loader, test_loader, output_results,
+                   caps_dir,
+                   num_epoch=500,
+                   lr=0.0001, beta1=0.9, beta2=0.999):
+    """Train a CycleGAN.
+
+    Args:
+        train_loader: (DataLoader) a DataLoader wrapping a the training dataset
+        test_loader: (DataLoader) a DataLoader wrapping a the test dataset
+        num_epoch: (int) number of epochs performed during training
+        lr: (float) learning rate of the discriminator and generator Adam optimizers
+        beta1: (float) beta1 coefficient of the discriminator and generator Adam optimizers
+        beta2: (float) beta1 coefficient of the discriminator and generator Adam optimizers
+
+    Returns:
+        generator: (nn.Module) the generator generating T2-w images from T1-w images.
+    """
+    columns = ['epoch', 'batch', 'loss_generator_from_1_to_2',
+               'loss_generator_from_2_to_1',
+               'loss_discriminator_from_1_to_2',
+               'loss_discriminator_from_2_to_1']
+    filename = os.path.join(output_results, 'training.tsv')
+
+    cuda = True if torch.cuda.is_available() else False
+    print(f"Using cuda device: {cuda}")  # check if GPU is used
+
+    # Tensor type (put everything on GPU if possible)
+    Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+
+    # Output folder
+    if not os.path.exists("./images/cyclegan"):
+        os.makedirs("./images/cyclegan")
+
+    # Loss functions
+    criterion_GAN_from_1_to_2 = torch.nn.BCEWithLogitsLoss()  # A loss adapted to binary classification like torch.nn.BCEWithLogitsLoss
+    criterion_GAN_from_2_to_1 = torch.nn.BCEWithLogitsLoss()  # A loss adapted to binary classification like torch.nn.BCEWithLogitsLoss
+    criterion_pixelwise_from_1_to_2 = torch.nn.L1Loss()  # A loss for a voxel-wise comparison of images like torch.nn.L1Loss
+    criterion_pixelwise_from_2_to_1 = torch.nn.L1Loss()  # A loss for a voxel-wise comparison of images like torch.nn.L1Loss
+
+    lambda_GAN = 1.  # Weights criterion_GAN in the generator loss
+    lambda_pixel = 1.  # Weights criterion_pixelwise in the generator loss
+
+    # Initialize generators and discriminators
+    generator_from_1_to_2 = GeneratorUNet()
+    generator_from_2_to_1 = GeneratorUNet()
+    discriminator_from_1_to_2 = DiscriminatorCycle()
+    discriminator_from_2_to_1 = DiscriminatorCycle()
+
+    if cuda:
+        generator_from_t1_to_t2 = generator_from_1_to_2.cuda()
+        generator_from_t2_to_t1 = generator_from_2_to_1.cuda()
+
+        discriminator_from_t1_to_t2 = discriminator_from_1_to_2.cuda()
+        discriminator_from_t2_to_t1 = discriminator_from_2_to_1.cuda()
+
+        criterion_GAN_from_t1_to_t2 = criterion_GAN_from_1_to_2.cuda()
+        criterion_GAN_from_t2_to_t1 = criterion_GAN_from_2_to_1.cuda()
+
+        criterion_pixelwise_from_t1_to_t2 = criterion_pixelwise_from_1_to_2.cuda()
+        criterion_pixelwise_from_t2_to_t1 = criterion_pixelwise_from_2_to_1.cuda()
+
+    # Optimizers
+    optimizer_generator_from_1_to_2 = torch.optim.Adam(
+        generator_from_1_to_2.parameters(), lr=lr, betas=(beta1, beta2))
+    optimizer_generator_from_2_to_1 = torch.optim.Adam(
+        generator_from_2_to_1.parameters(), lr=lr, betas=(beta1, beta2))
+
+    optimizer_discriminator_from_1_to_2 = torch.optim.Adam(
+        discriminator_from_1_to_2.parameters(), lr=lr, betas=(beta1, beta2))
+    optimizer_discriminator_from_2_to_1 = torch.optim.Adam(
+        discriminator_from_2_to_1.parameters(), lr=lr, betas=(beta1, beta2))
+
+    def sample_images(epoch):
+        """Saves a generated sample from the validation set"""
+        imgs = next(iter(test_loader))
+        real_1 = imgs["image_1"].type(Tensor)
+        real_2 = imgs["image_2"].type(Tensor)
+
+        ### reshape image
+        real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+
+        real_1[real_1 != real_1] = 0
+        real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
+        real_2[real_2 != real_2] = 0
+        real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
+
+        fake_2 = generator_from_1_to_2(real_1)
+        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_1'][0],
+                                 't1_linear',
+                                 imgs['participant_id'][0] + '_' + imgs['session_id_1'][
+                                     0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
+
+        header = nib.load(img_nifti).header
+        affine = nib.load(img_nifti).affine
+        fake_2 = fake_2.detach().cpu().numpy()
+        fake_2_example = nib.Nifti1Image(fake_2[0, 0, :, :, :], affine=affine, header=header)
+        # if not os.path.exists(os.path.join(output_results, 'epoch-' + str(epoch))):
+        #    os.makedirs(os.path.join(output_results, 'epoch-' + str(epoch)))
+        fake_2_example.to_filename(os.path.join(output_results, 'epoch-' + str(epoch) + '_' +
+                                                imgs['participant_id'][0] + '_' + imgs['session_id_1'][
+                                                    0] + '_reconstructed.nii.gz'))
+
+    # ----------
+    #  Training
+    # ----------
+
+    prev_time = time.time()
+
+    for epoch in range(num_epoch):
+        for i, batch in enumerate(train_loader):
+
+            # Inputs T1-w and T2-w
+            real_1 = batch["image_1"].type(Tensor)
+            real_2 = batch["image_2"].type(Tensor)
+
+            real_1[real_1 != real_1] = 0
+            real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
+            real_2[real_2 != real_2] = 0
+            real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
+
+            ### Reshape input ###
+            real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
+            real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+
+
+            # Create labels
+            valid_1 = Tensor(np.ones((real_1.size(0), 1, 1, 1, 1)))
+            imitation_1 = Tensor(np.zeros((real_1.size(0), 1, 1, 1,1)))
+
+            valid_2 = Tensor(np.ones((real_2.size(0), 1, 1, 1, 1)))
+            imitation_2 = Tensor(np.zeros((real_2.size(0), 1, 1, 1, 1)))
+
+            # ------------------
+            #  Train Generators
+            # ------------------
+            optimizer_generator_from_1_to_2.zero_grad()
+            optimizer_generator_from_2_to_1.zero_grad()
+
+            # GAN loss
+            fake_2 = generator_from_1_to_2(real_1)
+            pred_fake_2 = discriminator_from_1_to_2(fake_2)
+            loss_GAN_from_1_to_2 = criterion_GAN_from_1_to_2(pred_fake_2, valid_2)
+
+            fake_1 = generator_from_2_to_1(real_2)
+            pred_fake_1 = discriminator_from_2_to_1(fake_1)
+            loss_GAN_from_2_to_1 = criterion_GAN_from_2_to_1(pred_fake_1, valid_1)
+
+            # L1 loss
+            fake_fake_1 = generator_from_2_to_1(fake_2)
+            loss_pixel_from_1_to_2 = criterion_pixelwise_from_t1_to_t2(fake_fake_1, real_1)
+
+            fake_fake_2 = generator_from_t1_to_t2(fake_1)
+            loss_pixel_from_2_to_1 = criterion_pixelwise_from_t2_to_t1(fake_fake_2, real_2)
+
+            # Total loss
+            loss_generator_from_1_to_2 = (lambda_GAN * loss_GAN_from_1_to_2 +
+                                            lambda_pixel * loss_pixel_from_1_to_2)
+            loss_generator_from_2_to_1 = (lambda_GAN * loss_GAN_from_2_to_1 +
+                                            lambda_pixel * loss_pixel_from_2_to_1)
+
+            loss_generator_from_1_to_2.backward()
+            loss_generator_from_2_to_1.backward()
+
+            optimizer_generator_from_1_to_2.step()
+            optimizer_generator_from_2_to_1.step()
+
+            # ---------------------
+            #  Train Discriminator
+            # ---------------------
+
+            optimizer_discriminator_from_1_to_2.zero_grad()
+            optimizer_discriminator_from_2_to_1.zero_grad()
+
+            # Real loss
+            pred_real_2 = discriminator_from_1_to_2(real_2)
+            loss_real_2 = criterion_GAN_from_1_to_2(pred_real_2, valid_2)
+
+            pred_real_1 = discriminator_from_2_to_1(real_1)
+            loss_real_1 = criterion_GAN_from_2_to_1(pred_real_1, valid_1)
+
+            # Fake loss
+            pred_fake_2 = discriminator_from_1_to_2(fake_2.detach())
+            loss_fake_2 = criterion_GAN_from_1_to_2(pred_fake_2, imitation_2)
+
+            pred_fake_1 = discriminator_from_2_to_1(fake_1.detach())
+            loss_fake_1 = criterion_GAN_from_2_to_1(pred_fake_1, imitation_1)
+
+            # Total loss
+            loss_discriminator_from_1_to_2 = 0.5 * (loss_real_2 + loss_fake_2)
+            loss_discriminator_from_2_to_1 = 0.5 * (loss_real_1 + loss_fake_1)
+
+            loss_discriminator_from_1_to_2.backward()
+            loss_discriminator_from_2_to_1.backward()
+
+            optimizer_discriminator_from_1_to_2.step()
+            optimizer_discriminator_from_2_to_1.step()
+
+            # --------------
+            #  Log Progress
+            # --------------
+
+            # Determine approximate time left
+            batches_done = epoch * len(train_loader) + i
+            batches_left = num_epoch * len(train_loader) - batches_done
+            time_left = datetime.timedelta(
+                seconds=batches_left * (time.time() - prev_time))
+            prev_time = time.time()
+
+            # Print log
+            sys.stdout.write(
+                "\r[Epoch %d/%d] [Batch %d/%d] "
+                "[Generator losses: %f, %f] "
+                "[Discriminator losses: %f, %f] "
+                "ETA: %s"
+                % (
+                    epoch + 1,
+                    num_epoch,
+                    i,
+                    len(train_loader),
+                    loss_generator_from_1_to_2.item(),
+                    loss_generator_from_2_to_1.item(),
+                    loss_discriminator_from_1_to_2.item(),
+                    loss_discriminator_from_2_to_1.item(),
+                    time_left,
+                )
+            )
+
+        columns = ['epoch', 'batch', 'loss_generator_from_1_to_2',
+                   'loss_generator_from_2_to_1',
+                   'loss_discriminator_from_1_to_2',
+                   'loss_discriminator_from_2_to_1']
+        row = np.array(
+            [epoch + 1, i, loss_generator_from_1_to_2.item(), loss_generator_from_2_to_1.item(),
+            loss_discriminator_from_1_to_2.item(),
+             loss_discriminator_from_2_to_1.item()]
+        ).reshape(1, -1)
+        row_df = pd.DataFrame(row, columns=columns)
+        with open(filename, 'a') as f:
+            row_df.to_csv(f, header=True, index=False, sep='\t')
+
+
+        # Save images at the end of each epoch
+        sample_images(epoch)
+
+    return generator_from_t1_to_t2
