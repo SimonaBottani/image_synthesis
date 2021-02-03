@@ -23,7 +23,7 @@ import datetime
 import os
 import sys
 import time
-from train import train_cgan
+from train import train_cgan, train_generator
 from utils import *
 from evaluation import *
 
@@ -46,6 +46,13 @@ parser.add_argument(
         help='TSV path with subjects/sessions to use for data generation.',
         default=None
     )
+
+parser.add_argument(
+    'model_names',
+    help='Name of the type of the model used',
+    default='generator', nargs='+', type=str,
+    choices=['generator', 'conditional_gan', 'cycle_gan']
+)
 
 parser.add_argument(
         '--n_epoch',
@@ -106,6 +113,7 @@ beta2 = args.beta2
 n_splits = args.n_splits
 batch_size = args.batch_size
 num_epoch = args.n_epoch
+model = args.model_names
 diagnoses = ['gaudo_1']
 baseline = 'False'
 split = None
@@ -166,9 +174,17 @@ for fi in fold_iterator:
     if not os.path.exists(output_results_fold):
         os.makedirs(output_results_fold)
     # Train the generator
-    generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
+
+    if model == 'generator':
+        generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
+                               num_epoch,
+                               lr=lr, beta1=beta1, beta2=beta2)
+
+    elif model == 'conditional_GAN':
+        generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
                        num_epoch,
                             lr=lr, beta1=beta1, beta2=beta2)
+
 
 
     evaluate_generator(generator, train_loader, output_results_fold, modality='train')
