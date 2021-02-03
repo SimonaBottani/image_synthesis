@@ -175,6 +175,9 @@ for fi in fold_iterator:
         os.makedirs(output_results_fold)
     # Train the generator
 
+    print('this is the model')
+    print(model)
+
     if model == 'generator':
         generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
                                num_epoch,
