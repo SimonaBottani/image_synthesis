@@ -27,8 +27,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
     for i, batch in enumerate(batch_loader):
 
         # Inputs T1-w and T2-w
-        real_t1 = Variable(batch["T1"].type(Tensor), requires_grad=False)
-        real_t2 = Variable(batch["T2"].type(Tensor), requires_grad=False)
+        real_1 = Variable(batch["image_1"].type(Tensor), requires_grad=False)
+        real_2 = Variable(batch["image_2"].type(Tensor), requires_grad=False)
 
         real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
         real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
@@ -37,11 +37,11 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         real_2[real_2 != real_2] = 0
         real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
-        fake_t2 = Variable(generator(real_t1), requires_grad=False)
+        fake_2 = Variable(generator(real_1), requires_grad=False)
 
-        mae = mean_absolute_error(real_t2, fake_t2).item()
-        psnr = peak_signal_to_noise_ratio(real_t2, fake_t2).item()
-        ssim = structural_similarity_index(real_t2, fake_t2).item()
+        mae = mean_absolute_error(real_2, fake_2).item()
+        psnr = peak_signal_to_noise_ratio(real_2, fake_2).item()
+        ssim = structural_similarity_index(real_2, fake_2).item()
 
         res.append([mae, psnr, ssim])
 
