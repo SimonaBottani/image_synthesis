@@ -189,7 +189,7 @@ for fi in fold_iterator:
         generator = train_cyclegan(train_loader, valid_loader,output_results_fold, input_dir,
                        num_epoch,
                             lr=lr, beta1=beta1, beta2=beta2)
-        
+
 
 
 
