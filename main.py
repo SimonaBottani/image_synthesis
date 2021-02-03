@@ -23,7 +23,7 @@ import datetime
 import os
 import sys
 import time
-from train import train_cgan, train_generator
+from train import train_cgan, train_generator, train_cyclegan
 from utils import *
 from evaluation import *
 
@@ -184,6 +184,12 @@ for fi in fold_iterator:
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
                        num_epoch,
                             lr=lr, beta1=beta1, beta2=beta2)
+
+    elif model == ['cycle_gan']:
+        generator = train_cyclegan(train_loader, valid_loader,output_results_fold, input_dir,
+                       num_epoch,
+                            lr=lr, beta1=beta1, beta2=beta2)
+        
 
 
 

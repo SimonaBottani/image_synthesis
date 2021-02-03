@@ -160,3 +160,19 @@ class Discriminator(nn.Module):
         img_input = torch.cat((img_A, img_B), 1)
         return self.model(img_input)
 
+
+class DiscriminatorCycle(nn.Module):
+    def __init__(self, in_channels=1):
+        super(DiscriminatorCycle, self).__init__()
+
+        layers = []
+        layers.extend(discriminator_block(in_channels, 64))
+        layers.extend(discriminator_block(64, 128))
+        layers.extend(discriminator_block(128, 256))
+        layers.extend(discriminator_block(256, 512))
+        layers.append(nn.Conv2d(512, 1, 4, padding=0))
+        self.model = nn.Sequential(*layers)
+
+    def forward(self, img):
+        return self.model(img)
+
