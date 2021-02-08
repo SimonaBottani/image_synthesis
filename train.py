@@ -115,6 +115,7 @@ def train_cgan(train_loader, test_loader, output_results,
             imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] + '_reconstructed.nii.gz'))
 
 
+
     # ----------
     #  Training
     # ----------
@@ -292,9 +293,9 @@ def train_generator(train_loader, test_loader, output_results,
 
         fake_2 = generator(real_1)
 
-        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_1'][0],
+        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
                                  't1_linear',
-                                 imgs['participant_id'][0] + '_' + imgs['session_id_1'][0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
+                                 imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
 
         header = nib.load(img_nifti).header
         affine = nib.load(img_nifti).affine
@@ -303,7 +304,7 @@ def train_generator(train_loader, test_loader, output_results,
         #if not os.path.exists(os.path.join(output_results, 'epoch-' + str(epoch))):
         #    os.makedirs(os.path.join(output_results, 'epoch-' + str(epoch)))
         fake_2_example.to_filename(os.path.join(output_results, 'epoch-' + str(epoch) + '_' +
-            imgs['participant_id'][0] + '_' + imgs['session_id_1'][0] + '_reconstructed.nii.gz'))
+            imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] + '_reconstructed.nii.gz'))
 
     # ----------
     #  Training
@@ -470,9 +471,9 @@ def train_cyclegan(train_loader, test_loader, output_results,
         real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
         fake_2 = generator_from_1_to_2(real_1)
-        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_1'][0],
+        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
                                  't1_linear',
-                                 imgs['participant_id'][0] + '_' + imgs['session_id_1'][
+                                 imgs['participant_id'][0] + '_' + imgs['session_id_2'][
                                      0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
 
         header = nib.load(img_nifti).header
@@ -482,7 +483,7 @@ def train_cyclegan(train_loader, test_loader, output_results,
         # if not os.path.exists(os.path.join(output_results, 'epoch-' + str(epoch))):
         #    os.makedirs(os.path.join(output_results, 'epoch-' + str(epoch)))
         fake_2_example.to_filename(os.path.join(output_results, 'epoch-' + str(epoch) + '_' +
-                                                imgs['participant_id'][0] + '_' + imgs['session_id_1'][
+                                                imgs['participant_id'][0] + '_' + imgs['session_id_2'][
                                                     0] + '_reconstructed.nii.gz'))
 
     # ----------
