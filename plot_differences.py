@@ -6,10 +6,11 @@ import nibabel as nib
 participant_id = ['sub-A6690502920504586872']
 session_id = ['ses-M000']
 i = 0
-real_image = nib.load (os.path.join('/export/home/cse180022/apprimage_simo/image_preprocessing_data/ds9_caps',
+real_image_path = (os.path.join('/export/home/cse180022/apprimage_simo/image_preprocessing_data/ds9_caps',
                       'subjects', participant_id[i], 'ses-M000',
                                  't1_linear',participant_id[i] + '_' + 'ses-M000' + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz'))
 
+real_image = nib.load (real_image_path)
 header = nib.load(real_image).header
 affine = nib.load(real_image).affine
 ### I need to rescale this
