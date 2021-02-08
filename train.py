@@ -91,8 +91,8 @@ def train_cgan(train_loader, test_loader, output_results,
         real_2 = Variable(imgs["image_2"].type(Tensor))
 
         ### reshape image
-        real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
-        real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
 
         real_1[real_1 != real_1] = 0
         real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
@@ -101,9 +101,9 @@ def train_cgan(train_loader, test_loader, output_results,
 
         fake_2 = generator(real_1)
 
-        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_1'][0],
+        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
                                  't1_linear',
-                                 imgs['participant_id'][0] + '_' + imgs['session_id_1'][0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
+                                 imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] + '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w.nii.gz')
 
         header = nib.load(img_nifti).header
         affine = nib.load(img_nifti).affine
@@ -112,12 +112,8 @@ def train_cgan(train_loader, test_loader, output_results,
         #if not os.path.exists(os.path.join(output_results, 'epoch-' + str(epoch))):
         #    os.makedirs(os.path.join(output_results, 'epoch-' + str(epoch)))
         fake_2_example.to_filename(os.path.join(output_results, 'epoch-' + str(epoch) + '_' +
-            imgs['participant_id'][0] + '_' + imgs['session_id_1'][0] + '_reconstructed.nii.gz'))
+            imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] + '_reconstructed.nii.gz'))
 
-
-        #img_sample = torch.cat((real_1.data, fake_2.data, real_2.data), -2)
-        #save_image(img_sample, os.path.join(output_results, 'cgan/epoch-' + epoch + ".nii.gz"),
-        #           nrow=5, normalize=True)
 
     # ----------
     #  Training
@@ -138,8 +134,8 @@ def train_cgan(train_loader, test_loader, output_results,
             real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
             ### Reshape input ###
-            real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
-            real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+            real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+            real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
 
 
             # Create labels
@@ -154,7 +150,7 @@ def train_cgan(train_loader, test_loader, output_results,
             optimizer_generator.zero_grad()
 
             # GAN loss
-            fake_2 =  generator(real_1)  # To complete
+            fake_2 = generator(real_1)  # To complete
             pred_fake = discriminator(fake_2, real_1)
             loss_GAN = criterion_GAN(pred_fake, valid)
 
@@ -176,7 +172,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
             # Real loss
             pred_real = discriminator(real_2, real_1)   # To complete
-            loss_real =  criterion_GAN(pred_real, valid)  # To complete
+            loss_real = criterion_GAN(pred_real, valid)  # To complete
 
             # Fake loss
             pred_fake = discriminator(fake_2.detach(), real_1)   # To complete
@@ -227,7 +223,7 @@ def train_cgan(train_loader, test_loader, output_results,
         ).reshape(1, -1)
         row_df = pd.DataFrame(row, columns=columns)
         with open(filename, 'a') as f:
-            row_df.to_csv(f, header=False, index=False, sep='\t')
+            row_df.to_csv(f, header=True, index=False, sep='\t')
 
         sample_images(epoch)
 
@@ -286,8 +282,8 @@ def train_generator(train_loader, test_loader, output_results,
         real_2 = Variable(imgs["image_2"].type(Tensor))
 
         ### reshape image
-        real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
-        real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
 
         real_1[real_1 != real_1] = 0
         real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
@@ -328,18 +324,18 @@ def train_generator(train_loader, test_loader, output_results,
             real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
             ### Reshape input ###
-            real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
-            real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+            real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+            real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
 
 
             # Remove stored gradients
             optimizer.zero_grad()
 
             # Generate fake T2 images from the true T1 images
-            fake_2 =   generator(real_1) # To complete
+            fake_2 = generator(real_1)
 
             # Compute the corresponding loss
-            loss =  criterion(fake_2, real_2)  # To complete
+            loss = criterion(fake_2, real_2)  # To complete
 
             # Compute the gradient and perform one optimization step
             loss.backward()
@@ -376,7 +372,7 @@ def train_generator(train_loader, test_loader, output_results,
         ).reshape(1, -1)
         row_df = pd.DataFrame(row, columns=columns)
         with open(filename, 'a') as f:
-            row_df.to_csv(f, header=False, index=False, sep='\t')
+            row_df.to_csv(f, header=True, index=False, sep='\t')
 
 
         # Save images at the end of each epoch
@@ -465,8 +461,8 @@ def train_cyclegan(train_loader, test_loader, output_results,
         real_2 = imgs["image_2"].type(Tensor)
 
         ### reshape image
-        real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
-        real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
 
         real_1[real_1 != real_1] = 0
         real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
@@ -508,8 +504,8 @@ def train_cyclegan(train_loader, test_loader, output_results,
             real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
             ### Reshape input ###
-            real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
-            real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+            real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+            real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
 
 
             # Create labels

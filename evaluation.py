@@ -30,8 +30,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         real_1 = Variable(batch["image_1"].type(Tensor), requires_grad=False)
         real_2 = Variable(batch["image_2"].type(Tensor), requires_grad=False)
 
-        real_1 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
-        real_2 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
         real_1[real_1 != real_1] = 0
         real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
         real_2[real_2 != real_2] = 0

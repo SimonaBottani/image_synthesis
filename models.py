@@ -105,18 +105,19 @@ class GeneratorUNet(nn.Module):
     """
     def __init__(self, in_channels=1, out_channels=1):
         super(GeneratorUNet, self).__init__()
-        self.down1 = UNetDown(in_channels, 64)
-        self.down2 = UNetDown(64, 128)
-        self.down3 = UNetDown(128, 256)
-        self.down4 = UNetDown(256, 512)
-        self.down5 = UNetDown(512, 512)
 
-        self.up1 = UNetUp(512, 512)
-        self.up2 = UNetUp(1024, 256)
-        self.up3 = UNetUp(512, 128)
-        self.up4 = UNetUp(256, 64)
+        self.down1 = UNetDown(in_channels, 128)
+        self.down2 = UNetDown(128, 256)
+        self.down3 = UNetDown(256, 512)
+        self.down4 = UNetDown(512, 1024)
+        self.down5 = UNetDown(1024, 1024)
 
-        self.final = FinalLayer(128, 1)
+        self.up1 = UNetUp(1024, 1024)
+        self.up2 = UNetUp(2048, 512)
+        self.up3 = UNetUp(1024, 256)
+        self.up4 = UNetUp(512, 128)
+
+        self.final = FinalLayer(256, 1)
 
     def forward(self, x):
         d1 = self.down1(x)
