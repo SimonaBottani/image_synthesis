@@ -134,11 +134,11 @@ for fi in fold_iterator:
 
         param_dict = torch.load(os.path.join(output_results_fold, 'generator/best_loss',
                                              'model_best.pth.tar'), map_location="cpu")
-        best_model.load_state_dict(param_dict['model'])
+        generator.load_state_dict(param_dict['model'])
 
 
         if cuda:
-            best_model = best_model.cuda()
+            generator = generator.cuda()
 
     evaluate_generator(generator, test_loader, output_results_fold, modality='test')
     ### save images
