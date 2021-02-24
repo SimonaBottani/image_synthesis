@@ -142,12 +142,15 @@ for fi in fold_iterator:
             input_dir,
             training_df,
             preprocessing,
-            transformations=transformations)
+            transformations=transformations,
+            skull_strip="skull_strip")
     data_valid = MRIDatasetImage(
             input_dir,
             training_df,
             preprocessing,
-            transformations=transformations)
+            transformations=transformations,
+            skull_strip="skull_strip"
+    )
 
         # Use argument load to distinguish training and testing
 

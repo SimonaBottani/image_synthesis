@@ -7,8 +7,7 @@ import numpy as np
 import abc
 
 FILENAME_TYPE = {'full': '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w',
-                 'cropped': '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w',
-                 'skull_stripped': '_space-Ixi549Space_desc-skullstripped_T1w'}
+                 'cropped': '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w'}
 
 
 def commandline_to_json(commandline):
@@ -123,7 +122,7 @@ class MRIDataset(Dataset):
     """Abstract class for all derived MRIDatasets."""
 
     def __init__(self, caps_directory, data_file,
-                 preprocessing, transformations=None):
+                 preprocessing, transformations=None, skull_strip=None):
         self.caps_directory = caps_directory
         self.transformations = transformations
         self.diagnosis_code = {
@@ -144,6 +143,7 @@ class MRIDataset(Dataset):
             'cont_2': 2,
             'unlabeled': -1}
         self.preprocessing = preprocessing
+        self.skull_strip = skull_strip
 
         if not hasattr(self, 'elem_index'):
             raise ValueError(
@@ -173,13 +173,19 @@ class MRIDataset(Dataset):
     def __len__(self):
         return len(self.df) * self.elem_per_image
 
-    def _get_path(self, participant, session, mode="image"):
+    def _get_path(self, participant, session, mode="image", skull_strip=None):
 
         if self.preprocessing == "t1-linear":
-            image_path = path.join(self.caps_directory, 'subjects', participant, session,
+            if skull_strip == None:
+                image_path = path.join(self.caps_directory, 'subjects', participant, session,
                                    'deeplearning_prepare_data', '%s_based' % mode, 't1_linear',
                                    participant + '_' + session
                                    + FILENAME_TYPE['cropped'] + '.pt')
+            elif skull_strip == "skull_strip":
+                image_path = path.join(self.caps_directory, 'subjects', participant, session,
+                                       'deeplearning_prepare_data', '%s_based' % mode, 't1_linear',
+                                       participant + '_' + session
+                                       + '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_skull-skripped-hdbet_T1w.pt')
         elif self.preprocessing == "t1-extensive":
             image_path = path.join(self.caps_directory, 'subjects', participant, session,
                                    'deeplearning_prepare_data', '%s_based' % mode, 't1_extensive',
@@ -268,7 +274,7 @@ class MRIDatasetImage(MRIDataset):
     """Dataset of MRI organized in a CAPS folder."""
 
     def __init__(self, caps_directory, data_file,
-                 preprocessing='t1-linear', transformations=None):
+                 preprocessing='t1-linear', transformations=None, skull_strip=None):
         """
         Args:
             caps_directory (string): Directory of all the images.
@@ -279,15 +285,15 @@ class MRIDatasetImage(MRIDataset):
         """
         self.elem_index = None
         self.mode = "image"
-        super().__init__(caps_directory, data_file, preprocessing, transformations)
+        super().__init__(caps_directory, data_file, preprocessing, transformations, skull_strip)
 
     def __getitem__(self, idx):
         participant, session_1, session_2, _, label_1, label_2 = self._get_meta_data_paired_images(idx)
 
-        image_path_1 = self._get_path(participant, session_1, "image")
+        image_path_1 = self._get_path(participant, session_1, "image", skull_strip)
         image_1 = torch.load(image_path_1)
 
-        image_path_2 = self._get_path(participant, session_2, "image")
+        image_path_2 = self._get_path(participant, session_2, "image", skull_strip)
         image_2 = torch.load(image_path_2)
 
         if self.transformations:
