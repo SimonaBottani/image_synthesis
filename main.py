@@ -83,6 +83,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--skull_strip',
+    type=str,
+    default='skull_strip',
+    help='skull strip if skull_strip '
+)
+
+parser.add_argument(
     '--n_splits',
     type=int,
     help='number of CV'
@@ -120,6 +127,7 @@ split = None
 mode = 'image'
 preprocessing = 't1-linear'
 num_workers = 2
+skull_strip = "skull_strip"
 
 
 
@@ -143,13 +151,13 @@ for fi in fold_iterator:
             training_df,
             preprocessing,
             transformations=transformations,
-            skull_strip="skull_strip")
+            skull_strip=skull_strip)
     data_valid = MRIDatasetImage(
             input_dir,
             training_df,
             preprocessing,
             transformations=transformations,
-            skull_strip="skull_strip"
+            skull_strip=skull_strip
     )
 
         # Use argument load to distinguish training and testing
@@ -183,7 +191,7 @@ for fi in fold_iterator:
     if model == ['generator']:
         generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
                                    num_epoch,
-                                   lr=lr, beta1=beta1, beta2=beta2)
+                                   lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip)
 
     elif model == ['conditional_gan']:
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,

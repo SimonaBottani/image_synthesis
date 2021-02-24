@@ -176,7 +176,7 @@ class MRIDataset(Dataset):
     def _get_path(self, participant, session, mode="image"):
 
         if self.preprocessing == "t1-linear":
-            if self.skull_strip == None:
+            if self.skull_strip != 'skull_strip':
                 image_path = path.join(self.caps_directory, 'subjects', participant, session,
                                    'deeplearning_prepare_data', '%s_based' % mode, 't1_linear',
                                    participant + '_' + session

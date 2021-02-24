@@ -237,7 +237,7 @@ def train_cgan(train_loader, test_loader, output_results,
 def train_generator(train_loader, test_loader, output_results,
                     caps_dir,
                     num_epoch=500,
-                    lr=0.0001, beta1=0.9, beta2=0.999):
+                    lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None):
     """Train a generator on its own.
 
     Args:
@@ -299,10 +299,17 @@ def train_generator(train_loader, test_loader, output_results,
 
         fake_2 = generator(real_1)
 
-        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
+        if skull_strip != 'skull_strip':
+
+            img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
                                  't1_linear',
                                  imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] +
                                  '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w.nii.gz')
+        elif skull_strip == 'skull_strip':
+            img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
+                                 't1_linear',
+                                imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] +
+                                '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_skull-skripped-hdbet_T1w.nii.gz')
 
         header = nib.load(img_nifti).header
         affine = nib.load(img_nifti).affine
