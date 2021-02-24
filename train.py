@@ -23,7 +23,7 @@ import os
 import sys
 import time
 from models import GeneratorUNet, Discriminator, DiscriminatorCycle
-
+from evaluation import write_validation_tsv
 # Nibabel
 import nibabel as nib
 
@@ -380,7 +380,7 @@ def train_generator(train_loader, test_loader, output_results,
 
         # Save images at the end of each epoch
         sample_images(epoch)
-        write_validation_tsv(epoch, test_loader, outptu_results, generator, criterion)
+        write_validation_tsv(epoch, test_loader, output_results, generator, criterion)
 
 
     return generator
