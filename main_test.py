@@ -132,7 +132,7 @@ for fi in fold_iterator:
             generator = generator.cuda()
 
 
-        param_dict = torch.load(os.path.join(output_results_fold, 'generator',
+        param_dict = torch.load(os.path.join(output_results_fold, 'generator/best_loss',
                                              'model_best.pth.tar'), map_location="cpu")
         best_model.load_state_dict(param_dict['model'])
 
