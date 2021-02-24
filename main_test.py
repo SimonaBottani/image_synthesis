@@ -81,7 +81,7 @@ commandline_to_json(commandline)
 ## read command line arguments
 input_dir = args.caps_dir
 output_results = args.output_results
-tsv_path = args.tsv_path
+tsv_path = args.tsv_test
 n_splits = args.n_splits
 batch_size = args.batch_size
 model = args.model_names
