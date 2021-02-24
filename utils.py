@@ -290,10 +290,10 @@ class MRIDatasetImage(MRIDataset):
     def __getitem__(self, idx):
         participant, session_1, session_2, _, label_1, label_2 = self._get_meta_data_paired_images(idx)
 
-        image_path_1 = self._get_path(participant, session_1, "image", self.skull_strip)
+        image_path_1 = self._get_path(participant, session_1, "image")
         image_1 = torch.load(image_path_1)
 
-        image_path_2 = self._get_path(participant, session_2, "image", self.skull_strip)
+        image_path_2 = self._get_path(participant, session_2, "image")
         image_2 = torch.load(image_path_2)
 
         if self.transformations:
