@@ -55,7 +55,7 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
 
     return df
 
-def sample_images_testing(generator, test_loader, caps_dir, output_results):
+def sample_images_testing(generator, test_loader, caps_dir, output_results, skull_strip):
     """Saves a generated sample from the validation set"""
 
     import nibabel as nib
@@ -80,10 +80,18 @@ def sample_images_testing(generator, test_loader, caps_dir, output_results):
 
         fake_2 = generator(real_1)
 
-        img_nifti = os.path.join(caps_dir, 'subjects', batch['participant_id'][0], batch['session_id_2'][0],
+        if skull_strip != 'skull_strip':
+
+            img_nifti = os.path.join(caps_dir, 'subjects', batch['participant_id'][0], batch['session_id_2'][0],
                                  't1_linear',
                                  batch['participant_id'][0] + '_' + batch['session_id_2'][0] +
                                  '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w.nii.gz')
+
+        elif skull_strip == 'skull_strip':
+            img_nifti = os.path.join(caps_dir, 'subjects', batch['participant_id'][0], batch['session_id_2'][0],
+                                 't1_linear',
+                                batch['participant_id'][0] + '_' + batch['session_id_2'][0] +
+                                '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_skull-skripped-hdbet_T1w.nii.gz')
 
         header = nib.load(img_nifti).header
         affine = nib.load(img_nifti).affine

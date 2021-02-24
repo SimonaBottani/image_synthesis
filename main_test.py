@@ -56,6 +56,13 @@ parser.add_argument(
     choices=['generator', 'conditional_gan', 'cycle_gan']
 )
 
+parser.add_argument(
+    '--skull_strip',
+    type=str,
+    default='skull_strip',
+    help='skull strip if skull_strip '
+)
+
 
 parser.add_argument(
     '--n_splits',
@@ -91,6 +98,7 @@ split = None
 mode = 'image'
 preprocessing = 't1-linear'
 num_workers = 2
+skull_strip = args.skull_strip
 
 
 
@@ -108,7 +116,8 @@ for fi in fold_iterator:
         input_dir,
         testing_df,
         preprocessing,
-        transformations=transformations)
+        transformations=transformations,
+    skull_strip=skull_strip)
 
 
     test_loader = DataLoader(
@@ -146,5 +155,5 @@ for fi in fold_iterator:
     if not os.path.exists(os.path.join(output_results_fold, 'test_images')):
         os.makedirs(os.path.join(output_results_fold, 'test_images'))
     sample_images_testing(generator, test_loader, input_dir, os.path.join(output_results_fold, 'test_images'),
-                          )
+                          skull_strip)
 

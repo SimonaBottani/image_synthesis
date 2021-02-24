@@ -127,7 +127,7 @@ split = None
 mode = 'image'
 preprocessing = 't1-linear'
 num_workers = 2
-skull_strip = "skull_strip"
+skull_strip = args.skull_strip
 
 
 
