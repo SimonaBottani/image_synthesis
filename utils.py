@@ -173,15 +173,15 @@ class MRIDataset(Dataset):
     def __len__(self):
         return len(self.df) * self.elem_per_image
 
-    def _get_path(self, participant, session, mode="image", skull_strip=None):
+    def _get_path(self, participant, session, mode="image"):
 
         if self.preprocessing == "t1-linear":
-            if skull_strip == None:
+            if self.skull_strip == None:
                 image_path = path.join(self.caps_directory, 'subjects', participant, session,
                                    'deeplearning_prepare_data', '%s_based' % mode, 't1_linear',
                                    participant + '_' + session
                                    + FILENAME_TYPE['cropped'] + '.pt')
-            elif skull_strip == "skull_strip":
+            elif self.skull_strip == "skull_strip":
                 image_path = path.join(self.caps_directory, 'subjects', participant, session,
                                        'deeplearning_prepare_data', '%s_based' % mode, 't1_linear',
                                        participant + '_' + session
@@ -285,7 +285,7 @@ class MRIDatasetImage(MRIDataset):
         """
         self.elem_index = None
         self.mode = "image"
-        super().__init__(caps_directory, data_file, preprocessing, transformations, self.skull_strip)
+        super().__init__(caps_directory, data_file, preprocessing, transformations, skull_strip)
 
     def __getitem__(self, idx):
         participant, session_1, session_2, _, label_1, label_2 = self._get_meta_data_paired_images(idx)
