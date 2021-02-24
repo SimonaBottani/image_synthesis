@@ -55,6 +55,44 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
 
     return df
 
+def sample_images_testing(generator, test_loader, caps_dir, output_results):
+    """Saves a generated sample from the validation set"""
+
+    import nibabel as nib
+
+    cuda = True if torch.cuda.is_available() else False
+    Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+
+    for i, batch in enumerate(test_loader):
+
+
+        real_1 = Variable(batch["image_1"].type(Tensor))
+        real_2 = Variable(batch["image_2"].type(Tensor))
+
+        ### reshape image
+        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
+
+        real_1[real_1 != real_1] = 0
+        real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
+        real_2[real_2 != real_2] = 0
+        real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
+
+        fake_2 = generator(real_1)
+
+        img_nifti = os.path.join(caps_dir, 'subjects', batch['participant_id'][0], batch['session_id_2'][0],
+                                 't1_linear',
+                                 batch['participant_id'][0] + '_' + batch['session_id_2'][0] +
+                                 '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w.nii.gz')
+
+        header = nib.load(img_nifti).header
+        affine = nib.load(img_nifti).affine
+        fake_2 = fake_2.detach().cpu().numpy()
+        fake_2_example = nib.Nifti1Image(fake_2[0,0,:,:,:], affine=affine, header=header)
+        #if not os.path.exists(os.path.join(output_results, 'epoch-' + str(epoch))):
+        #    os.makedirs(os.path.join(output_results, 'epoch-' + str(epoch)))
+        fake_2_example.to_filename(os.path.join(output_results,
+            batch['participant_id'][0] + '_' + batch['session_id_2'][0] + '_reconstructed.nii.gz'))
 
 
 def write_validation_tsv(epoch, valid_loader, output_results, generator, criterion):

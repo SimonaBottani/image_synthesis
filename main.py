@@ -121,8 +121,10 @@ mode = 'image'
 preprocessing = 't1-linear'
 num_workers = 2
 
-transformations = get_transforms(mode, minmaxnormalization=True)
 
+
+
+transformations = get_transforms(mode, minmaxnormalization=True)
 
 fold_iterator = range(n_splits)
 
@@ -130,65 +132,65 @@ fold_iterator = range(n_splits)
 for fi in fold_iterator:
 
     training_df, valid_df = load_data(
-        tsv_path,
-        diagnoses,
-        fi,
-        n_splits=n_splits,
-        baseline=baseline)
+            tsv_path,
+            diagnoses,
+            fi,
+            n_splits=n_splits,
+            baseline=baseline)
 
     data_train = MRIDatasetImage(
-        input_dir,
-        training_df,
-        preprocessing,
-        transformations=transformations)
+            input_dir,
+            training_df,
+            preprocessing,
+            transformations=transformations)
     data_valid = MRIDatasetImage(
-        input_dir,
-        training_df,
-        preprocessing,
-        transformations=transformations)
+            input_dir,
+            training_df,
+            preprocessing,
+            transformations=transformations)
 
-    # Use argument load to distinguish training and testing
+        # Use argument load to distinguish training and testing
 
-    #### insert here data sampler
-    # data_sampler = generate_sampler(data_train, 'weighted')
+        #### insert here data sampler
+        # data_sampler = generate_sampler(data_train, 'weighted')
 
     train_loader = DataLoader(
-        data_train,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        pin_memory=True
-    )
+            data_train,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+            pin_memory=True
+        )
 
     valid_loader = DataLoader(
-        data_valid,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=True
-    )
+            data_valid,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=True
+        )
 
 
 
     output_results_fold = os.path.join(output_results, 'fold-' + str(fi))
     if not os.path.exists(output_results_fold):
         os.makedirs(output_results_fold)
-    # Train the generator
+        # Train the generator
 
     if model == ['generator']:
         generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
-                               num_epoch,
-                               lr=lr, beta1=beta1, beta2=beta2)
+                                   num_epoch,
+                                   lr=lr, beta1=beta1, beta2=beta2)
 
     elif model == ['conditional_gan']:
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
-                       num_epoch,
-                            lr=lr, beta1=beta1, beta2=beta2)
+                           num_epoch,
+                                lr=lr, beta1=beta1, beta2=beta2)
 
     elif model == ['cycle_gan']:
         generator = train_cyclegan(train_loader, valid_loader,output_results_fold, input_dir,
-                       num_epoch,
-                            lr=lr, beta1=beta1, beta2=beta2)
+                           num_epoch,
+                                lr=lr, beta1=beta1, beta2=beta2)
 
 
 

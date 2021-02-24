@@ -270,6 +270,7 @@ def train_generator(train_loader, test_loader, output_results,
     # Loss function
     criterion = torch.nn.L1Loss()   # To complete. A loss for a voxel-wise comparison of images like torch.nn.L1Loss
 
+
     # Initialize the generator
     generator = GeneratorUNet()  # To complete.
 
@@ -307,9 +308,10 @@ def train_generator(train_loader, test_loader, output_results,
         affine = nib.load(img_nifti).affine
         fake_2 = fake_2.detach().cpu().numpy()
         fake_2_example = nib.Nifti1Image(fake_2[0,0,:,:,:], affine=affine, header=header)
-        #if not os.path.exists(os.path.join(output_results, 'epoch-' + str(epoch))):
-        #    os.makedirs(os.path.join(output_results, 'epoch-' + str(epoch)))
-        fake_2_example.to_filename(os.path.join(output_results, 'epoch-' + str(epoch) + '_' +
+        if not os.path.exists(os.path.join(output_results, 'validation_images' )):
+            os.makedirs(os.path.join(output_results, 'validation_images'))
+
+        fake_2_example.to_filename(os.path.join(output_results, 'validation_images', 'epoch-' + str(epoch) + '_' +
             imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] + '_reconstructed.nii.gz'))
 
     # ----------
