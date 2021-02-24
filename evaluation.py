@@ -54,3 +54,50 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
 
 
     return df
+
+
+
+def write_validation_tsv(epoch, valid_loader, output_results, generator, criterion):
+    """
+
+    :param epoch: epoch
+    :param valid_loader: validation loader
+    :param output_results: where to save the file
+    :param generator: generator UNet
+    :param criterion: L1 loss
+    :return: file for validation tsv
+    """
+
+    filename = os.path.join(output_results, 'validation.tsv')
+    columns = ['epoch', 'batch', 'loss']
+
+    # Tensor type (put everything on GPU if possibile)
+    cuda = True if torch.cuda.is_available() else False
+    Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+
+    for i, batch in enumerate(valid_loader):
+
+        real_1 = Variable(batch["image_1"].type(Tensor))
+        real_2 = Variable(batch["image_2"].type(Tensor))
+
+        ### reshape image
+        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
+
+        real_1[real_1 != real_1] = 0
+        real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
+        real_2[real_2 != real_2] = 0
+        real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
+
+        fake_2 = generator(real_1)
+        loss = criterion(fake_2, real_2)
+
+
+    row = np.array(
+        [epoch + 1, i,
+         loss.item()]
+    ).reshape(1, -1)
+    row_df = pd.DataFrame(row, columns=columns)
+    with open(filename, 'a') as f:
+        row_df.to_csv(f, header=True, index=False, sep='\t')
+
