@@ -24,6 +24,7 @@ import sys
 import time
 from models import GeneratorUNet, Discriminator, DiscriminatorCycle
 from evaluation import write_validation_tsv
+from utils import save_checkpoint
 # Nibabel
 import nibabel as nib
 
@@ -250,8 +251,11 @@ def train_generator(train_loader, test_loader, output_results,
     Returns:
         generator: (nn.Module) the trained generator
     """
+    best_valid_loss = np.inf
+
     columns = ['epoch', 'batch', 'loss']
     filename = os.path.join(output_results, 'training.tsv')
+    model_dir = os.path.join(output_results, 'generator')
 
     cuda = True if torch.cuda.is_available() else False
     print(f"Using cuda device: {cuda}")  # check if GPU is used
@@ -380,9 +384,24 @@ def train_generator(train_loader, test_loader, output_results,
 
         # Save images at the end of each epoch
         sample_images(epoch)
-        write_validation_tsv(epoch, test_loader, output_results, generator, criterion)
+        loss_valid = write_validation_tsv(epoch, test_loader, output_results, generator, criterion)
 
+        loss_is_best = loss_valid < best_valid_loss
+        best_valid_loss = min(loss_valid, best_valid_loss)
 
+        save_checkpoint({'model': generator.state_dict(),
+                         'epoch': epoch,
+                         'valid_loss': loss_valid},
+                        loss_is_best,
+                        model_dir)
+        # Save optimizer state_dict to be able to reload
+        save_checkpoint({'optimizer': optimizer.state_dict(),
+                         'epoch': epoch,
+                         'name': optimizer,
+                         },
+                        False,
+                        model_dir,
+                        filename='optimizer.pth.tar')
     return generator
 
 

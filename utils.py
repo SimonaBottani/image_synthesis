@@ -350,3 +350,22 @@ def load_data(train_val_path, diagnoses_list,
 
     return train_df, valid_df
 
+
+
+
+def save_checkpoint(state, loss_is_best, checkpoint_dir, filename='checkpoint.pth.tar',
+                   best_loss='best_loss'):
+    import torch
+    import os
+    import shutil
+
+    if not os.path.exists(checkpoint_dir):
+        os.makedirs(checkpoint_dir)
+
+    torch.save(state, os.path.join(checkpoint_dir, filename))
+
+    if loss_is_best:
+        best_loss_path = os.path.join(checkpoint_dir, best_loss)
+        if not os.path.exists(best_loss_path):
+            os.makedirs(best_loss_path)
+        shutil.copyfile(os.path.join(checkpoint_dir, filename), os.path.join(best_loss_path, 'model_best.pth.tar'))

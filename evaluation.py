@@ -101,3 +101,5 @@ def write_validation_tsv(epoch, valid_loader, output_results, generator, criteri
     with open(filename, 'a') as f:
         row_df.to_csv(f, header=True, index=False, sep='\t')
 
+    return loss
+
