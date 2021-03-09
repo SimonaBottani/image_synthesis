@@ -268,8 +268,8 @@ def train_generator(train_loader, test_loader, output_results,
         os.makedirs(os.path.join(output_results, 'generator'))
 
     # Loss function
-    criterion = torch.nn.L1Loss()   # To complete. A loss for a voxel-wise comparison of images like torch.nn.L1Loss
-
+    #criterion = torch.nn.L1Loss()   # To complete. A loss for a voxel-wise comparison of images like torch.nn.L1Loss
+    criterion = torch.nn.MSELoss()
 
     # Initialize the generator
     generator = GeneratorUNet()  # To complete.
