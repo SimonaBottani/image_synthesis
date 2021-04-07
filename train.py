@@ -268,8 +268,8 @@ def train_generator(train_loader, test_loader, output_results,
         os.makedirs(os.path.join(output_results, 'generator'))
 
     # Loss function
-    #criterion = torch.nn.L1Loss()   # To complete. A loss for a voxel-wise comparison of images like torch.nn.L1Loss
-    criterion = torch.nn.MSELoss()
+    criterion = torch.nn.L1Loss()   # To complete. A loss for a voxel-wise comparison of images like torch.nn.L1Loss
+    #criterion = torch.nn.MSELoss()
 
     # Initialize the generator
     generator = GeneratorUNet()  # To complete.
@@ -391,8 +391,9 @@ def train_generator(train_loader, test_loader, output_results,
             row_df.to_csv(f, header=True, index=False, sep='\t')
 
 
-        # Save images at the end of each epoch
-        sample_images(epoch)
+        # Save results at the end of each epoch and images each 20 epochs
+        if epoch % 20 == 0:
+            sample_images(epoch)
         loss_valid = write_validation_tsv(epoch, test_loader, output_results, generator, criterion)
 
         loss_is_best = loss_valid < best_valid_loss

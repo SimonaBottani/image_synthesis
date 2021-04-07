@@ -133,6 +133,44 @@ class GeneratorUNet(nn.Module):
 
         return self.final(u4, d1)
 
+class GeneratorUNetResMod(nn.Module):
+    """
+    The generator will have a U-Net architecture with the following characteristics:
+
+    the descending blocks are convolutional layers followed by instance normalization with a LeakyReLU activation function;
+
+    the ascending blocks are transposed convolutional layers followed by instance normalization with a ReLU activation function.
+
+    """
+    def __init__(self, in_channels=1, out_channels=1):
+        super(GeneratorUNetResMod, self).__init__()
+
+        self.down1 = UNetDown(in_channels, 128)
+        self.down2 = UNetDown(128, 256)
+        self.down3 = UNetDown(256, 512)
+        self.down4 = UNetDown(512, 1024)
+        self.down5 = UNetDown(1024, 1024)
+
+        self.up1 = UNetUp(1024, 1024)
+        self.up2 = UNetUp(2048, 512)
+        self.up3 = UNetUp(1024, 256)
+        self.up4 = UNetUp(512, 128)
+
+        self.final = FinalLayer(256, 1)
+
+    def forward(self, x):
+        d1 = self.down1(x)
+        d2 = self.down2(d1)
+        d3 = self.down3(d2)
+        d4 = self.down4(d3)
+        d5 = self.down5(d4)
+
+        u1 = self.up1(d5)
+        u2 = self.up2(u1, d4)
+        u3 = self.up3(u2, d3)
+        u4 = self.up4(u3, d2)
+
+        return self.final(u4, d1)
 
 ################## Discriminator ###########################
 
