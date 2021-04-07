@@ -135,6 +135,10 @@ skull_strip = args.skull_strip
 transformations = get_transforms(mode, minmaxnormalization=True)
 
 fold_iterator = range(n_splits)
+if torch.cuda.is_available():
+    print('>> GPU available.')
+    DEVICE = torch.device('cuda')
+    torch.cuda.set_device(3)
 
 
 for fi in fold_iterator:
