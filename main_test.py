@@ -154,7 +154,7 @@ for fi in fold_iterator:
 
     evaluate_generator(generator, test_loader, output_results_fold, modality='test')
     ### save images
-
+    print('save files')
     if not os.path.exists(os.path.join(output_results_fold, 'test_images')):
         os.makedirs(os.path.join(output_results_fold, 'test_images'))
     sample_images_testing(generator, test_loader, input_dir, os.path.join(output_results_fold, 'test_images'),
