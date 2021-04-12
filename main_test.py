@@ -132,8 +132,11 @@ for fi in fold_iterator:
     output_results_fold = os.path.join(output_results, 'fold-' + str(fi))
     cuda = True if torch.cuda.is_available() else False
     print(f"Using cuda device: {cuda}")  # check if GPU is used
+    if cuda == True:
 
 
+        DEVICE = torch.device('cuda')
+        torch.cuda.set_device(3)
 
     if model == ['generator']:
         generator = GeneratorUNet()
