@@ -5,7 +5,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 from torch.autograd import Variable
-
+import scipy
 import pandas as pd
 import os
 from metrics import *
@@ -39,9 +39,28 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
 
         fake_2 = Variable(generator(real_1), requires_grad=False)
 
-        mae = mean_absolute_error(real_2, fake_2).item()
-        psnr = peak_signal_to_noise_ratio(real_2, fake_2).item()
-        ssim = structural_similarity_index(real_2, fake_2).item()
+        ## create mask for the metrics
+
+        real_1_mask = real_1
+        real_2_mask = real_2
+
+        real_1_mask[real_1_mask != 0] = 1
+        real_2_mask[real_2_mask != 0] = 1
+
+        mask = real_1_mask + real_2_mask
+        mask[mask != 0] = 1
+        #c_mask = scipy.ndimage.morphology.binary_fill_holes(c, structure=None, output=None, origin=0)
+        #c_mask = nib.Nifti1Image(c_mask, affine=affine, header=header)
+        fake_2_masked = fake_2
+        real_2_masked = real_2
+        real_2_masked[mask == 0] = 0
+        fake_2_masked[mask == 0] = 0
+
+
+
+        mae = mean_absolute_error(real_2_masked, fake_2_masked).item()
+        psnr = peak_signal_to_noise_ratio(real_2_masked, fake_2_masked).item()
+        ssim = structural_similarity_index(real_2_masked, fake_2_masked).item()
 
         res.append([mae, psnr, ssim])
 
