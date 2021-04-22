@@ -44,7 +44,7 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         ### resize
         real_1 = real_1[0,0,:,:,:]
         real_2 = real_2[0,0,:,:,:]
-        fake_2 = fake_2[0,0,;,;,:]
+        fake_2 = fake_2[0,0,:,:,:]
 
         real_1_mask = real_1
         real_2_mask = real_2
