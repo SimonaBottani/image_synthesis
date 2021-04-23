@@ -12,8 +12,6 @@ def mean_absolute_error(image_true, image_generated):
     Returns:
         mse: (float) mean squared error
     """
-    #return torch.abs(image_true - image_generated).mean()
-
 
     return torch.abs(image_true - image_generated).mean()
 

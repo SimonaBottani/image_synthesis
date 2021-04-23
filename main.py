@@ -211,10 +211,10 @@ for fi in fold_iterator:
         # Train the generator
 
     if model == ['generator']:
-        if model_generator == 'GeneratorUNetResMod':
+        if model_generator == ['GeneratorUNetResMod']:
             print('i am here')
             model_generator = GeneratorUNetResMod()
-        elif model_generator == 'GeneratorUNet':
+        elif model_generator == ['GeneratorUNet']:
             print('not i am here')
             model_generator = GeneratorUNet()
 
