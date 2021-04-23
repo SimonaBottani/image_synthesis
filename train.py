@@ -22,7 +22,7 @@ import datetime
 import os
 import sys
 import time
-from models import GeneratorUNet, Discriminator, DiscriminatorCycle
+from models import GeneratorUNet, Discriminator, DiscriminatorCycle, GeneratorUNetResMod
 from evaluation import write_validation_tsv
 from utils import save_checkpoint
 # Nibabel
@@ -235,7 +235,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
 
 def train_generator(train_loader, test_loader, output_results,
-                    caps_dir,
+                    caps_dir, model_generator,
                     num_epoch=500,
                     lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None):
     """Train a generator on its own.
@@ -272,7 +272,7 @@ def train_generator(train_loader, test_loader, output_results,
     #criterion = torch.nn.MSELoss()
 
     # Initialize the generator
-    generator = GeneratorUNet()  # To complete.
+    generator = model_generator #GeneratorUNet()  # To complete.
 
     if cuda:
         generator = generator.cuda()

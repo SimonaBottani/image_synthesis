@@ -26,6 +26,8 @@ import time
 from train import train_cgan, train_generator, train_cyclegan
 from utils import *
 from evaluation import *
+from models import GeneratorUNet, Discriminator, DiscriminatorCycle, GeneratorUNetResMod
+
 
 
 parser = argparse.ArgumentParser(description='image synthesis')
@@ -53,6 +55,14 @@ parser.add_argument(
     default='generator', nargs='+', type=str,
     choices=['generator', 'conditional_gan', 'cycle_gan']
 )
+
+parser.add_argument(
+    'generator_name',
+    help='Name of the type of the model used',
+    default='generator', nargs='+', type=str,
+    choices=['GeneratorUNet', 'GeneratorUNetResMod']
+)
+
 
 parser.add_argument(
         '--n_epoch',
@@ -103,6 +113,13 @@ parser.add_argument(
     help='batch_size'
 )
 
+parser.add_argument(
+    '--n_gpu',
+    type=int,
+    default=3,
+    help='number_id_gpu'
+)
+
 
 args = parser.parse_args()
 
@@ -128,7 +145,8 @@ mode = 'image'
 preprocessing = 't1-linear'
 num_workers = 2
 skull_strip = args.skull_strip
-
+n_gpu = args.n_gpu
+model_generator = args.generator_name
 
 
 
@@ -138,7 +156,7 @@ fold_iterator = range(n_splits)
 if torch.cuda.is_available():
     print('>> GPU available.')
     DEVICE = torch.device('cuda')
-    torch.cuda.set_device(3)
+    torch.cuda.set_device(n_gpu)
 
 
 for fi in fold_iterator:
@@ -193,7 +211,13 @@ for fi in fold_iterator:
         # Train the generator
 
     if model == ['generator']:
+        if model_generator == 'GeneratorUNetResMod':
+            model_generator = GeneratorUNetResMod()
+        elif model_generator == 'GeneratorUNet':
+            model_generator = GeneratorUNet()
+
         generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
+                                    model_generator,
                                    num_epoch,
                                    lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip)
 

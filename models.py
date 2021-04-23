@@ -41,10 +41,41 @@ class UNetDown(nn.Module):
             nn.Conv3d(in_size, out_size, kernel_size=3, stride=2, padding=1),
             nn.InstanceNorm3d(out_size),
             nn.LeakyReLU(0.2)
+
           )
 
     def forward(self, x):
         return self.model(x)
+        ### pour residual: self.model(x) + x
+    ##### au as
+
+
+class Res(nn.Module):
+
+    def __init__(self, in_size, out_size, n_conv):
+        super(Res, self).__init__()
+        if n_conv == 1:
+            self.model = nn.Sequential(
+            nn.Conv3d(in_size, out_size, kernel_size=3, stride=1, padding=1),
+            nn.LeakyReLU(0.2)
+            )
+        elif n_conv == 2:
+            self.model = nn.Sequential(
+                nn.Conv3d(in_size, out_size, kernel_size=3, stride=1, padding=1),
+                nn.Conv3d(in_size, out_size, kernel_size=3, stride=1, padding=1),
+                nn.LeakyReLU(0.2)
+            )
+        elif n_conv == 3:
+            self.model = nn.Sequential(
+                nn.Conv3d(in_size, out_size, kernel_size=3, stride=1, padding=1),
+                nn.Conv3d(in_size, out_size, kernel_size=3, stride=1, padding=1),
+                nn.Conv3d(in_size, out_size, kernel_size=3, stride=1, padding=1),
+                nn.LeakyReLU(0.2)
+            )
+
+    def forward(self, x):
+        return self.model(x) + x
+
 
 
 class UNetUp(nn.Module):
@@ -145,6 +176,11 @@ class GeneratorUNetResMod(nn.Module):
     def __init__(self, in_channels=1, out_channels=1):
         super(GeneratorUNetResMod, self).__init__()
 
+        self.r1 = Res(128, 128, 1) ##dr1
+        self.r2 = Res(256, 256, 2) ##dr2
+        self.r3 = Res(512, 512, 3) ##dr3
+        self.r4 = Res(1024, 1024, 3) ##dr4, dr5
+
         self.down1 = UNetDown(in_channels, 128)
         self.down2 = UNetDown(128, 256)
         self.down3 = UNetDown(256, 512)
@@ -159,18 +195,35 @@ class GeneratorUNetResMod(nn.Module):
         self.final = FinalLayer(256, 1)
 
     def forward(self, x):
+
         d1 = self.down1(x)
-        d2 = self.down2(d1)
-        d3 = self.down3(d2)
-        d4 = self.down4(d3)
-        d5 = self.down5(d4)
+        dr1 = self.r1(d1)
 
-        u1 = self.up1(d5)
-        u2 = self.up2(u1, d4)
-        u3 = self.up3(u2, d3)
-        u4 = self.up4(u3, d2)
+        d2 = self.down2(dr1)
+        dr2 = self.r2(d2)
 
-        return self.final(u4, d1)
+        d3 = self.down3(dr2)
+        dr3 = self.r3(d3)
+
+        d4 = self.down4(dr3)
+        dr4 = self.r4(d4)
+
+        d5 = self.down5(dr4) ## out= 1024
+        dr5 = self.r4(d5) ## 1024, 2024
+
+        u1 = self.up1(dr5)
+        ur1 = self.r4(u1) ## 1024, 2024
+
+        u2 = self.up2(ur1, d4) ## out= 512
+        ur2 = self.r3(u2) ## 512, 512
+
+        u3 = self.up3(ur2, d3) ## out=256
+        ur3 = self.r2(u3)
+
+        u4 = self.up4(ur3, d2) ## out = 128
+        ur4 = self.r1(u4)
+
+        return self.final(ur4, dr1)
 
 ################## Discriminator ###########################
 

@@ -9,6 +9,7 @@ import scipy
 import pandas as pd
 import os
 from metrics import *
+import numpy as np
 
 def evaluate_generator(generator, batch_loader, output_results_fold, modality='train'):
     """Evaluate a generator.
