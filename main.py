@@ -212,8 +212,10 @@ for fi in fold_iterator:
 
     if model == ['generator']:
         if model_generator == 'GeneratorUNetResMod':
+            print('i am here')
             model_generator = GeneratorUNetResMod()
         elif model_generator == 'GeneratorUNet':
+            print('not i am here')
             model_generator = GeneratorUNet()
 
         generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
