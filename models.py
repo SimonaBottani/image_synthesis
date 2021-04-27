@@ -367,7 +367,7 @@ class Discriminator(nn.Module):
         layers.extend(discriminator_block(128, 256))
         layers.extend(discriminator_block(256, 512))
         layers.append(nn.Conv3d(512, 1, 4, padding=0))
-
+        layers.append(nn.AvgPool3d(5))
         self.model = nn.Sequential(*layers)
 
     def forward(self, img_A, img_B):
