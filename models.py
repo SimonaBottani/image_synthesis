@@ -227,6 +227,129 @@ class GeneratorUNetResMod(nn.Module):
 
 ################## Discriminator ###########################
 
+class GeneratorUNetResMod_64(nn.Module):
+    """
+    The generator will have a U-Net architecture with the following characteristics:
+
+    the descending blocks are convolutional layers followed by instance normalization with a LeakyReLU activation function;
+
+    the ascending blocks are transposed convolutional layers followed by instance normalization with a ReLU activation function.
+
+    """
+    def __init__(self, in_channels=1, out_channels=1):
+        super(GeneratorUNetResMod_64, self).__init__()
+
+        self.r1 = Res(64, 64, 1) ##dr1
+        self.r2 = Res(128, 128, 2) ##dr2
+        self.r3 = Res(256, 256, 3) ##dr3
+        self.r4 = Res(512, 512, 3) ##dr4, dr5
+
+        self.down1 = UNetDown(in_channels, 64)
+        self.down2 = UNetDown(64, 128)
+        self.down3 = UNetDown(128, 256)
+        self.down4 = UNetDown(256, 512)
+        self.down5 = UNetDown(512, 512)
+
+        self.up1 = UNetUp(512, 512)
+        self.up2 = UNetUp(1024, 256)
+        self.up3 = UNetUp(512, 128)
+        self.up4 = UNetUp(256, 64)
+
+        self.final = FinalLayer(128, 1)
+
+    def forward(self, x):
+
+        d1 = self.down1(x)
+        dr1 = self.r1(d1)
+
+        d2 = self.down2(dr1)
+        dr2 = self.r2(d2)
+
+        d3 = self.down3(dr2)
+        dr3 = self.r3(d3)
+
+        d4 = self.down4(dr3)
+        dr4 = self.r4(d4)
+
+        d5 = self.down5(dr4) ## out= 1024
+        dr5 = self.r4(d5) ## 1024, 2024
+
+        u1 = self.up1(dr5)
+        ur1 = self.r4(u1) ## 1024, 2024
+
+        u2 = self.up2(ur1, d4) ## out= 512
+        ur2 = self.r3(u2) ## 512, 512
+
+        u3 = self.up3(ur2, d3) ## out=256
+        ur3 = self.r2(u3)
+
+        u4 = self.up4(ur3, d2) ## out = 128
+        ur4 = self.r1(u4)
+
+        return self.final(ur4, dr1)
+
+
+class GeneratorUNetResMod_Concat_Layer(nn.Module):
+    """
+    The generator will have a U-Net architecture with the following characteristics:
+
+    the descending blocks are convolutional layers followed by instance normalization with a LeakyReLU activation function;
+
+    the ascending blocks are transposed convolutional layers followed by instance normalization with a ReLU activation function.
+
+    """
+    def __init__(self, in_channels=1, out_channels=1):
+        super(GeneratorUNetResMod_Concat_Layer, self).__init__()
+
+        self.r1 = Res(64, 64, 1) ##dr1
+        self.r2 = Res(128, 128, 2) ##dr2
+        self.r3 = Res(256, 256, 3) ##dr3
+        self.r4 = Res(512, 512, 3) ##dr4, dr5
+
+        self.down1 = UNetDown(in_channels, 64)
+        self.down2 = UNetDown(64, 128)
+        self.down3 = UNetDown(128, 256)
+        self.down4 = UNetDown(256, 512)
+        self.down5 = UNetDown(512, 512)
+
+        self.up1 = UNetUp(64, 128)
+        self.up2 = UNetUp(1024, 256)
+        self.up3 = UNetUp(512, 128)
+        self.up4 = UNetUp(256, 64)
+
+        self.final = FinalLayer(128, 1)
+
+    def forward(self, x):
+
+        d1 = self.down1(x)
+        dr1 = self.r1(d1)
+
+        d2 = self.down2(dr1)
+        dr2 = self.r2(d2)
+
+        d3 = self.down3(dr2)
+        dr3 = self.r3(d3)
+
+        d4 = self.down4(dr3)
+        dr4 = self.r4(d4)
+
+        d5 = self.down5(dr4) ## out= 1024
+        dr5 = self.r4(d5) ## 1024, 2024
+
+        u1 = self.up1(dr5)
+        ur1 = self.r4(u1) ## 1024, 2024
+
+        u2 = self.up2(ur1, d4) ## out= 512
+        ur2 = self.r3(u2) ## 512, 512
+
+        u3 = self.up3(ur2, d3) ## out=256
+        ur3 = self.r2(u3)
+
+        u4 = self.up4(ur3, d2) ## out = 128
+        ur4 = self.r1(u4)
+
+        return self.final(ur4, dr1)
+################## Discriminator ###########################
 
 def discriminator_block(in_filters, out_filters):
     """Return downsampling layers of each discriminator block"""
