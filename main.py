@@ -224,8 +224,15 @@ for fi in fold_iterator:
                                    lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip)
 
     elif model == ['conditional_gan']:
+        if model_generator == ['GeneratorUNetResMod']:
+            print(model_generator)
+            model_generator = GeneratorUNetResMod()
+        elif model_generator == ['GeneratorUNet']:
+            print(model_generator)
+            model_generator = GeneratorUNet()
+
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
-                           num_epoch,
+                           num_epoch, model_generator,
                                 lr=lr, beta1=beta1, beta2=beta2)
 
     elif model == ['cycle_gan']:
