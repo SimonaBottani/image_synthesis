@@ -33,7 +33,7 @@ import nibabel as nib
 def train_cgan(train_loader, test_loader, output_results,
                caps_dir, model_generator,
                num_epoch=500,
-               lr=0.0001, beta1=0.9, beta2=0.999):
+               lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None):
     """Train a conditional GAN.
 
     Args:
@@ -102,18 +102,26 @@ def train_cgan(train_loader, test_loader, output_results,
 
         fake_2 = generator(real_1)
 
-        img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
+        if skull_strip != 'skull_strip':
+
+            img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
                                  't1_linear',
                                  imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] +
                                  '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w.nii.gz')
+        elif skull_strip == 'skull_strip':
+            img_nifti = os.path.join(caps_dir, 'subjects', imgs['participant_id'][0], imgs['session_id_2'][0],
+                                 't1_linear',
+                                imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] +
+                                '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_skull-skripped-hdbet_T1w.nii.gz')
 
         header = nib.load(img_nifti).header
         affine = nib.load(img_nifti).affine
         fake_2 = fake_2.detach().cpu().numpy()
         fake_2_example = nib.Nifti1Image(fake_2[0,0,:,:,:], affine=affine, header=header)
-        #if not os.path.exists(os.path.join(output_results, 'epoch-' + str(epoch))):
-        #    os.makedirs(os.path.join(output_results, 'epoch-' + str(epoch)))
-        fake_2_example.to_filename(os.path.join(output_results, 'epoch-' + str(epoch) + '_' +
+        if not os.path.exists(os.path.join(output_results, 'validation_images' )):
+            os.makedirs(os.path.join(output_results, 'validation_images'))
+
+        fake_2_example.to_filename(os.path.join(output_results, 'validation_images', 'epoch-' + str(epoch) + '_' +
             imgs['participant_id'][0] + '_' + imgs['session_id_2'][0] + '_reconstructed.nii.gz'))
 
 
@@ -228,7 +236,9 @@ def train_cgan(train_loader, test_loader, output_results,
         with open(filename, 'a') as f:
             row_df.to_csv(f, header=True, index=False, sep='\t')
 
-        sample_images(epoch)
+        if epoch % 20 == 0:
+            sample_images(epoch)
+
 
     return generator
 

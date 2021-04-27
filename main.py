@@ -233,7 +233,7 @@ for fi in fold_iterator:
 
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
                            num_epoch, model_generator,
-                                lr=lr, beta1=beta1, beta2=beta2)
+                                lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip)
 
     elif model == ['cycle_gan']:
         generator = train_cyclegan(train_loader, valid_loader,output_results_fold, input_dir,
