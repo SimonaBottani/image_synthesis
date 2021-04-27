@@ -232,7 +232,8 @@ for fi in fold_iterator:
             model_generator = GeneratorUNet()
 
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
-                           num_epoch, model_generator,
+                            model_generator,
+                               num_epoch,
                                 lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip)
 
     elif model == ['cycle_gan']:

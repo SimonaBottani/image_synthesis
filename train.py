@@ -31,7 +31,7 @@ import nibabel as nib
 
 
 def train_cgan(train_loader, test_loader, output_results,
-               caps_dir, model_generator,
+                caps_dir, model_generator,
                num_epoch=500,
                lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None):
     """Train a conditional GAN.
