@@ -78,6 +78,20 @@ parser.add_argument(
     help='batch_size'
 )
 
+parser.add_argument(
+    '--generator_name',
+    help='Name of the type of the model used',
+    default='GeneratorUNet', nargs='+', type=str,
+    choices=['GeneratorUNet', 'GeneratorUNetResMod']
+)
+
+parser.add_argument(
+    '--n_gpu',
+    type=int,
+    default=3,
+    help='number_id_gpu'
+)
+
 
 args = parser.parse_args()
 
@@ -99,6 +113,8 @@ mode = 'image'
 preprocessing = 't1-linear'
 num_workers = 2
 skull_strip = args.skull_strip
+n_gpu = args.n_gpu
+model_generator = args.generator_name
 
 
 
@@ -133,13 +149,16 @@ for fi in fold_iterator:
     cuda = True if torch.cuda.is_available() else False
     print(f"Using cuda device: {cuda}")  # check if GPU is used
     if cuda == True:
-
-
         DEVICE = torch.device('cuda')
-        torch.cuda.set_device(3)
+        torch.cuda.set_device(n_gpu)
 
     if model == ['generator']:
-        generator = GeneratorUNet()
+        if model_generator == ['GeneratorUNetResMod']:
+            model_generator = GeneratorUNetResMod()
+        elif model_generator == ['GeneratorUNet']:
+            model_generator = GeneratorUNet()
+
+        generator = model_generator
         if cuda:
             generator = generator.cuda()
 
@@ -148,9 +167,6 @@ for fi in fold_iterator:
                                              'model_best.pth.tar'), map_location="cpu")
         generator.load_state_dict(param_dict['model'])
 
-
-        if cuda:
-            generator = generator.cuda()
 
     evaluate_generator(generator, test_loader, output_results_fold, modality='test')
     ### save images
