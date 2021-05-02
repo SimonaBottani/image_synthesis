@@ -132,8 +132,118 @@ def train_cgan(train_loader, test_loader, output_results,
 
     prev_time = time.time()
 
-    for epoch in range(num_epoch):
+    for epoch in range(150):
+        for i, data in enumerate(train_loader, 0): ## for the first 150 epoch I only train the generator
+
+            # Inputs T1-w and T2-w
+            real_1 = data["image_1"].type(Tensor)
+            real_2 = data["image_2"].type(Tensor)
+
+            real_1[real_1 != real_1] = 0
+            real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
+            real_2[real_2 != real_2] = 0
+            real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
+
+            ### Reshape input ###
+            real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+            real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
+
+
+            # Create labels
+            valid = Variable(Tensor(np.ones((real_2.size(0), 1, 1, 1, 1))),
+                             requires_grad=False)
+            fake = Variable(Tensor(np.zeros((real_2.size(0), 1, 1, 1, 1))),
+                            requires_grad=False)
+
+            # -----------------
+            #  Train Generator
+            # -----------------
+            optimizer_generator.zero_grad()
+
+            # GAN loss
+            fake_2 = generator(real_1)  # To complete
+            #pred_fake = discriminator(fake_2, real_1)
+            #loss_GAN = criterion_GAN(pred_fake, valid)
+
+            # L1 loss
+            loss_pixel = criterion_pixelwise(fake_2, real_2)
+
+            # Total loss
+            loss_generator = 0 * 0 + lambda_pixel * loss_pixel
+
+            # Compute the gradient and perform one optimization step
+            loss_generator.backward()
+            optimizer_generator.step()
+
+            # ---------------------
+            #  Train Discriminator
+            # ---------------------
+
+            #optimizer_discriminator.zero_grad()
+
+            # Real loss
+            #pred_real = discriminator(real_2, real_1)   # To complete
+            #loss_real = criterion_GAN(pred_real, valid)  # To complete
+
+            # Fake loss
+            #fake_2 = generator(real_1)
+            #pred_fake = discriminator(fake_2.detach(), real_1)   # To complete
+            #loss_fake = criterion_GAN(pred_fake, fake)   # To complete
+
+            # Total loss
+            #loss_discriminator = 0
+
+            # Compute the gradient and perform one optimization step
+            #loss_discriminator.backward()
+            #optimizer_discriminator.step()
+
+            # --------------
+            #  Log Progress
+            # --------------
+
+            # Determine approximate time left
+            batches_done = epoch * len(train_loader) + i
+            batches_left = num_epoch * len(train_loader) - batches_done
+            time_left = datetime.timedelta(
+                seconds=batches_left * (time.time() - prev_time))
+            prev_time = time.time()
+
+            # Print log
+            sys.stdout.write(
+                "\r[Epoch %d/%d] [Batch %d/%d] [D loss: %f] "
+                "[G loss: %f, pixel: %f, adv: %f] ETA: %s"
+                % (
+                    epoch + 1,
+                    num_epoch,
+                    i,
+                    len(train_loader),
+                    0,
+                    loss_generator.item(),
+                    loss_pixel.item(),
+                    0,
+                    time_left,
+                )
+            )
+
+        # Save images at the end of each epoch
+
+        columns = ['epoch', 'batch', 'loss_discriminator', 'loss_generator', 'loss_pixel', 'loss_GAN']
+        row = np.array(
+            [epoch + 1, i, 0, loss_generator.item(),
+            loss_pixel.item(),
+             0]
+        ).reshape(1, -1)
+        row_df = pd.DataFrame(row, columns=columns)
+        with open(filename, 'a') as f:
+            row_df.to_csv(f, header=True, index=False, sep='\t')
+
+        if epoch % 20 == 0:
+            sample_images(epoch)
+
+
+    for epoch in range(150, num_epoch):
         for i, data in enumerate(train_loader, 0):
+            ## Train Generator for the first 100 epoch and discriminator for the others
 
             # Inputs T1-w and T2-w
             real_1 = data["image_1"].type(Tensor)
@@ -426,7 +536,9 @@ def train_generator(train_loader, test_loader, output_results,
     return generator
 
 def train_generator_multiscale(train_loader, test_loader, output_results,
-                    caps_dir, model_generator_1,model_generator_2,
+                    caps_dir,
+                    model_generator_1,model_generator_2,
+                    model_generator_3,
                     num_epoch=500,
                     lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None):
     """Train a generator on its own.
@@ -461,20 +573,29 @@ def train_generator_multiscale(train_loader, test_loader, output_results,
     # Loss function
     criterion_1 = torch.nn.L1Loss()   # To complete. A loss for a voxel-wise comparison of images like torch.nn.L1Loss
     criterion_2 = torch.nn.L1Loss()
+    criterion_3 = torch.nn.L1Loss()
 
     # Initialize the generator
     generator_1 = model_generator_1 #GeneratorUNet()  # To complete.
     generator_2 = model_generator_2
+    generator_3 = model_generator_3
 
     if cuda:
         generator_1 = generator_1.cuda()
         criterion_1.cuda()
         generator_2 = generator_2.cuda()
         criterion_2.cuda()
+        generator_3 = generator_3.cuda()
+        criterion_3.cuda()
 
     # Optimizer
-    optimizer = torch.optim.Adam(generator.parameters(),
+    optimizer_1 = torch.optim.Adam(generator_1.parameters(),
                                  lr=lr, betas=(beta1, beta2))
+
+    optimizer_2 = torch.optim.Adam(generator_2.parameters(),
+                                   lr=lr, betas=(beta1, beta2))
+    optimizer_3 = torch.optim.Adam(generator_3.parameters(),
+                                   lr=lr, betas=(beta1, beta2))
 
     def sample_images(epoch):
         """Saves a generated sample from the validation set"""
@@ -491,7 +612,7 @@ def train_generator_multiscale(train_loader, test_loader, output_results,
         real_2[real_2 != real_2] = 0
         real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
-        fake_2 = generator(real_1)
+        fake_2 = generator_3(real_1)
 
         if skull_strip != 'skull_strip':
 
@@ -537,20 +658,33 @@ def train_generator_multiscale(train_loader, test_loader, output_results,
             real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
             real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
 
+            real_1_64 = F.interpolate(real_1, size=(64, 64, 64), mode='trilinear', align_corners=False)
+            real_2_64 = F.interpolate(real_2, size=(64, 64, 64), mode='trilinear', align_corners=False)
+
+
 
             # Remove stored gradients
-            optimizer.zero_grad()
+            optimizer_1.zero_grad()
+            optimizer_2.zero_grad()
+            optimizer_3.zero_grad()
 
             # Generate fake T2 images from the true T1 images
-            fake_2 = generator(real_1)
+            fake_2_128 = generator_1(real_1) ##output of the first CNN
+            fake_2_64 = generator_2(real_1_64) ##output of the second CNN
+            fake_2 = generator_3(??) ##final output of the CNN -> the input are the two fake !
 
             # Compute the corresponding loss
-            loss = criterion(fake_2, real_2)
+            loss_1 = criterion_1(fake_2_128, real_2)
+            loss_2 = criterion_2(fake_2_64, real_2_64)
+            loss_3 = criterion_3(fake_2, real_2)
 
             # Compute the gradient and perform one optimization step
-            loss.backward()
-            optimizer.step()
-
+            loss_1.backward()
+            optimizer_1.step()
+            loss_2.backward()
+            optimizer_2.step()
+            loss_3.backward()
+            optimizer_3.step()
             # --------------
             #  Log Progress
             # --------------
