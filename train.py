@@ -535,6 +535,7 @@ def train_generator(train_loader, test_loader, output_results,
                         filename='optimizer.pth.tar')
     return generator
 
+"""
 def train_generator_multiscale(train_loader, test_loader, output_results,
                     caps_dir,
                     model_generator_1,model_generator_2,
@@ -554,6 +555,7 @@ def train_generator_multiscale(train_loader, test_loader, output_results,
     Returns:
         generator: (nn.Module) the trained generator
     """
+
     best_valid_loss = np.inf
 
     columns = ['epoch', 'batch', 'loss']
@@ -742,7 +744,7 @@ def train_generator_multiscale(train_loader, test_loader, output_results,
                         filename='optimizer.pth.tar')
     return generator
 
-
+"""
 def train_cyclegan(train_loader, test_loader, output_results,
                    caps_dir,
                    num_epoch=500,
