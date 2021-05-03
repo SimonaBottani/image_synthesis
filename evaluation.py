@@ -21,7 +21,9 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         modality: 'train', 'valid', 'test'
 
     """
-    res = []
+    res_mae = []
+    res_pnsr = []
+    res_ssim = []
 
     cuda = True if torch.cuda.is_available() else False
     Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
@@ -68,15 +70,19 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         mae = mean_absolute_error(real_2_masked, fake_2_masked).item()
         psnr = peak_signal_to_noise_ratio(real_2_masked, fake_2_masked).item()
         ssim = structural_similarity_index(real_2_masked, fake_2_masked).item()
+        res_mae.append(mae)
+        res_pnsr.append(psnr)
+        res_ssim.append(ssim)
 
-        res.append([mae, psnr, ssim])
+
+        #res.append([mae, psnr, ssim])
 
 
     #df = pd.DataFrame([
     #    pd.DataFrame(res, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze()
     #], index=[modality]).T
     df = pd.DataFrame([
-        pd.DataFrame(data = {'MAE':mae, 'PSNR':psnr, 'SSIM': ssim})
+        pd.DataFrame(data = {'MAE':res_mae, 'PSNR':res_pnsr, 'SSIM': res_ssim})
     ], index=[modality])
 
     df.to_csv(os.path.join(output_results_fold, 'metric_evaluation_' + modality + '.tsv'), sep='\t')
