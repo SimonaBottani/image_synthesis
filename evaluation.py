@@ -88,10 +88,9 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
     #df = pd.DataFrame([
     #    pd.DataFrame(res, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze()
     #], index=[modality]).T
-    df = pd.DataFrame([
-        pd.DataFrame(data = {'MAE':res_mae, 'PSNR':res_pnsr, 'SSIM': res_ssim,
+    df = pd.DataFrame(data = {'MAE':res_mae, 'PSNR':res_pnsr, 'SSIM': res_ssim,
                              'participant_id': participant_id, 'session_id': session_id})
-    ])
+
 
     df.to_csv(os.path.join(output_results_fold, 'metric_evaluation_' + modality + '.tsv'), sep='\t')
 
