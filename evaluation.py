@@ -10,6 +10,7 @@ import pandas as pd
 import os
 from metrics import *
 import numpy as np
+import copy
 
 def evaluate_generator(generator, batch_loader, output_results_fold, modality='train'):
     """Evaluate a generator.
@@ -47,8 +48,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         real_2 = real_2[0,0,:,:,:]
         fake_2 = fake_2[0,0,:,:,:]
 
-        real_1_mask = real_1
-        real_2_mask = real_2
+        real_1_mask = copy.deepcopy(real_1) ### deepcopy !!!
+        real_2_mask = copy.deepcopy(real_2) ### deepcopy !!!
 
         real_1_mask[real_1_mask != 0] = 1
         real_2_mask[real_2_mask != 0] = 1
@@ -57,8 +58,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         mask[mask != 0] = 1
         #c_mask = scipy.ndimage.morphology.binary_fill_holes(c, structure=None, output=None, origin=0)
         #c_mask = nib.Nifti1Image(c_mask, affine=affine, header=header)
-        fake_2_masked = fake_2
-        real_2_masked = real_2
+        fake_2_masked = copy.deepcopy(fake_2) ### deepcopy !!!
+        real_2_masked = copy.deepcopy(real_2) ### deepcopy !!!
         real_2_masked[mask == 0] = 0
         fake_2_masked[mask == 0] = 0
 
@@ -71,9 +72,12 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         res.append([mae, psnr, ssim])
 
 
+    #df = pd.DataFrame([
+    #    pd.DataFrame(res, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze()
+    #], index=[modality]).T
     df = pd.DataFrame([
-        pd.DataFrame(res, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze()
-    ], index=[modality]).T
+        pd.DataFrame(data = {'MAE':mae, 'PSNR':psnr, 'SSIM': ssim})
+    ], index=[modality])
 
     df.to_csv(os.path.join(output_results_fold, 'metric_evaluation_' + modality + '.tsv'), sep='\t')
 
