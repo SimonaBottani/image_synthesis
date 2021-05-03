@@ -75,8 +75,11 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         res_mae.append(mae)
         res_pnsr.append(psnr)
         res_ssim.append(ssim)
-        participant_id.append(batch['participant_id'].item())
-        session_id.append(batch['session_id_2'].item())
+        print("THE BAATHC")
+        print(batch['participant_id'])
+        print(batch['participant_id'][0])
+        participant_id.append(batch['participant_id'])
+        session_id.append(batch['session_id_2'])
 
 
         #res.append([mae, psnr, ssim])
