@@ -24,6 +24,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
     res_mae = []
     res_pnsr = []
     res_ssim = []
+    participant_id = []
+    session_id = []
 
     cuda = True if torch.cuda.is_available() else False
     Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
@@ -73,6 +75,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         res_mae.append(mae)
         res_pnsr.append(psnr)
         res_ssim.append(ssim)
+        participant_id.append(batch['participant_id'].item())
+        session_id.append(batch['session_id_2'].item())
 
 
         #res.append([mae, psnr, ssim])
@@ -82,8 +86,9 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
     #    pd.DataFrame(res, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze()
     #], index=[modality]).T
     df = pd.DataFrame([
-        pd.DataFrame(data = {'MAE':res_mae, 'PSNR':res_pnsr, 'SSIM': res_ssim})
-    ], index=[modality])
+        pd.DataFrame(data = {'MAE':res_mae, 'PSNR':res_pnsr, 'SSIM': res_ssim,
+                             'participant_id': participant_id, 'session_id': session_id})
+    ])
 
     df.to_csv(os.path.join(output_results_fold, 'metric_evaluation_' + modality + '.tsv'), sep='\t')
 
