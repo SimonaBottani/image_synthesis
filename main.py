@@ -176,7 +176,7 @@ for fi in fold_iterator:
             skull_strip=skull_strip)
     data_valid = MRIDatasetImage(
             input_dir,
-            training_df,
+            valid_df,
             preprocessing,
             transformations=transformations,
             skull_strip=skull_strip
