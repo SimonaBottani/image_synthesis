@@ -349,6 +349,77 @@ class GeneratorUNetResMod_Concat_Layer(nn.Module):
         ur4 = self.r1(u4)
 
         return self.final(ur4, dr1)
+
+
+class Attention_block(nn.Module):
+    def __init__(self, F_g, F_l, F_int):
+        super(Attention_block, self).__init__()
+
+        self.W_g = nn.Sequential(
+            nn.Conv3d(F_l, F_int, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.BatchNorm3d(F_int)
+        )
+
+        self.W_x = nn.Sequential(
+            nn.Conv3d(F_g, F_int, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.BatchNorm3d(F_int)
+        )
+
+        self.psi = nn.Sequential(
+            nn.Conv3d(F_int, 1, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.BatchNorm3d(1),
+            nn.Sigmoid()
+        )
+
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, g, x):
+        g1 = self.W_g(g)
+        x1 = self.W_x(x)
+        psi = self.relu(g1 + x1)
+        psi = self.psi(psi)
+        out = x * psi
+        return out
+
+class GeneratorUNetAttMod(nn.Module): ## TO FINISH
+    """
+    The generator will have a U-Net architecture with the following characteristics:
+
+    the descending blocks are convolutional layers followed by instance normalization with a LeakyReLU activation function;
+
+    the ascending blocks are transposed convolutional layers followed by instance normalization with a ReLU activation function.
+
+    """
+    def __init__(self, in_channels=1, out_channels=1):
+        super(GeneratorUNet, self).__init__()
+
+        self.down1 = UNetDown(in_channels, 128)
+        self.down2 = UNetDown(128, 256)
+        self.down3 = UNetDown(256, 512)
+        self.down4 = UNetDown(512, 1024)
+        self.down5 = UNetDown(1024, 1024)
+
+        self.up1 = UNetUp(1024, 1024)
+        self.up2 = UNetUp(2048, 512)
+        self.up3 = UNetUp(1024, 256)
+        self.up4 = UNetUp(512, 128)
+
+        self.final = FinalLayer(256, 1)
+
+    def forward(self, x):
+        d1 = self.down1(x)
+        d2 = self.down2(d1)
+        d3 = self.down3(d2)
+        d4 = self.down4(d3)
+        d5 = self.down5(d4)
+
+        u1 = self.up1(d5)
+        u2 = self.up2(u1, d4)
+        u3 = self.up3(u2, d3)
+        u4 = self.up4(u3, d2)
+
+        return self.final(u4, d1)
+
 ################## Discriminator ###########################
 
 def discriminator_block(in_filters, out_filters):
