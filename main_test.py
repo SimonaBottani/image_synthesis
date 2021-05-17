@@ -92,6 +92,21 @@ parser.add_argument(
     help='number_id_gpu'
 )
 
+parser.add_argument(
+    '--real_im_exists',
+    type=int,
+    default=1,
+    help='if real_im to compare exists: 1, if not : 0'
+)
+
+parser.add_argument(
+    '--name_test_folder',
+    type=str,
+    default='test_images',
+    help='name of the test folder'
+)
+
+
 
 args = parser.parse_args()
 
@@ -115,6 +130,9 @@ num_workers = 2
 skull_strip = args.skull_strip
 n_gpu = args.n_gpu
 model_generator = args.generator_name
+real_im_exists = args.real_im_exists
+name_test_folder = args.name_test_folder
+
 
 
 
@@ -167,12 +185,16 @@ for fi in fold_iterator:
                                              'model_best.pth.tar'), map_location="cpu")
         generator.load_state_dict(param_dict['model'])
 
+    if real_im_exists == 1:
+        evaluate_generator(generator, test_loader, output_results_fold, modality='test')
 
-    evaluate_generator(generator, test_loader, output_results_fold, modality='test')
+    else:
+        print('I do not have the real image for comparison')
     ### save images
     print('save files')
-    if not os.path.exists(os.path.join(output_results_fold, 'test_images')):
-        os.makedirs(os.path.join(output_results_fold, 'test_images'))
-    sample_images_testing(generator, test_loader, input_dir, os.path.join(output_results_fold, 'test_images'),
+    if not os.path.exists(os.path.join(output_results_fold, name_test_folder)):
+        os.makedirs(os.path.join(output_results_fold, name_test_folder))
+
+    sample_images_testing(generator, test_loader, input_dir, os.path.join(output_results_fold, name_test_folder),
                           skull_strip)
 
