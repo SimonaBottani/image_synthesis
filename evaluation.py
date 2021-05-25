@@ -164,6 +164,7 @@ def write_validation_tsv(epoch, valid_loader, output_results, generator, criteri
 
         real_1 = Variable(batch["image_1"].type(Tensor))
         real_2 = Variable(batch["image_2"].type(Tensor))
+        
 
         ### reshape image
         real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
