@@ -185,12 +185,8 @@ for fi in fold_iterator:
                                              'model_best.pth.tar'), map_location="cpu")
         generator.load_state_dict(param_dict['model'])
 
-    if real_im_exists == 1:
-        print('oh no i am here')
         evaluate_generator(generator, test_loader, output_results_fold, modality='test')
 
-    else:
-        print('I do not have the real image for comparison')
     ### save images
     print('save files')
     if not os.path.exists(os.path.join(output_results_fold, name_test_folder)):
