@@ -86,7 +86,7 @@ class UNetUp(nn.Module):
         out_size : (int) number of channels in the output image.
 
     """
-    def T__init__(self, in_size, out_size):
+    def __init__(self, in_size, out_size):
         super(UNetUp, self).__init__()
         self.model = nn.Sequential(
             nn.ConvTranspose3d(in_size, out_size, kernel_size=4,
