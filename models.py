@@ -535,7 +535,7 @@ class AttU_Net(nn.Module):
     def __init__(self, img_ch=1, output_ch=1):
         super(AttU_Net, self).__init__()
 
-        self.Maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.Maxpool = nn.MaxPool3d(kernel_size=2, stride=2)
 
         self.Conv1 = conv_block(ch_in=img_ch, ch_out=128)
         self.Conv2 = conv_block(ch_in=128, ch_out=256)
@@ -601,7 +601,6 @@ class AttU_Net(nn.Module):
         d1 = self.Conv_1x1(d2)
 
         return d1
-
 
 class R2AttU_Net(nn.Module):
 
