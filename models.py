@@ -411,7 +411,7 @@ class R2U_Net(nn.Module):
 
     """
     def __init__(self, in_channels=1, out_channels=1,t=2):
-        super(GeneratorUNetAttMod_R2UNet, self).__init__()
+        super(R2U_Net, self).__init__()
 
         self.Maxpool = nn.MaxPool3d(kernel_size=2, stride=2)
 

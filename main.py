@@ -26,7 +26,7 @@ import time
 from train import train_cgan, train_generator, train_cyclegan
 from utils import *
 from evaluation import *
-from models import GeneratorUNet, Discriminator, DiscriminatorCycle, GeneratorUNetResMod
+from models import GeneratorUNet, Discriminator, DiscriminatorCycle, GeneratorUNetResMod, R2AttU_Net, AttU_Net, R2U_Net
 
 
 
@@ -218,6 +218,13 @@ for fi in fold_iterator:
         elif model_generator == ['GeneratorUNet']:
             print('not i am here')
             model_generator = GeneratorUNet()
+        elif model_generator == ['R2U_Net']:
+            model_generator = R2U_Net()
+        elif model_generator == ['AttU_Net']:
+            model_generator = AttU_Net()
+        elif model_generator == ['R2AttU_Net']:
+            model_generator = R2AttU_Net()
+
 
         generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
                                     model_generator,
