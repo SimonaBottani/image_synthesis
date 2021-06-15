@@ -60,7 +60,8 @@ parser.add_argument(
     '--generator_name',
     help='Name of the type of the model used',
     default='GeneratorUNet', nargs='+', type=str,
-    choices=['GeneratorUNet', 'GeneratorUNetResMod']
+    choices=['GeneratorUNet', 'GeneratorUNetResMod', 'AttU_Net',
+             'R2AttU_Net', 'R2U_Net']
 )
 
 
