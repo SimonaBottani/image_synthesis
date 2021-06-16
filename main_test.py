@@ -112,7 +112,7 @@ args = parser.parse_args()
 
 ## write command line arguments on json
 commandline = parser.parse_known_args()
-commandline_to_json(commandline)
+commandline_to_json(commandline, test=True)
 
 ## read command line arguments
 input_dir = args.caps_dir

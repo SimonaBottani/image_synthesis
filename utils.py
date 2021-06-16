@@ -10,7 +10,7 @@ FILENAME_TYPE = {'full': '_T1w_space-MNI152NLin2009cSym_res-1x1x1_T1w',
                  'cropped': '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_T1w'}
 
 
-def commandline_to_json(commandline):
+def commandline_to_json(commandline, test=False):
     """
     This is a function to write the python argparse object into a json file.
     This helps for DL when searching for hyperparameters
@@ -32,8 +32,12 @@ def commandline_to_json(commandline):
 
     # save to json file
     json = json.dumps(commandline_arg_dic, skipkeys=True, indent=4)
-    print("Path of json file:", os.path.join(output_dir, "commandline.json"))
-    f = open(os.path.join(output_dir, "commandline.json"), "w")
+    if test:
+        print("Path of json file:", os.path.join(output_dir, "commandline_test.json"))
+        f = open(os.path.join(output_dir, "commandline_test.json"), "w")
+    else:
+        print("Path of json file:", os.path.join(output_dir, "commandline.json"))
+        f = open(os.path.join(output_dir, "commandline.json"), "w")
     f.write(json)
     f.close()
 
