@@ -38,8 +38,18 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         # Inputs T1-w and T2-w
         real_1 = Variable(batch["image_1"].type(Tensor), requires_grad=False)
         real_2 = Variable(batch["image_2"].type(Tensor), requires_grad=False)
+
+        ####### TO TEST
         real_1_sk_st = Variable(batch["image_path_1_skull_strip"].type(Tensor), requires_grad=False)
         real_2_sk_st = Variable(batch["image_path_2_skull_strip"].type(Tensor), requires_grad=False)
+        real_1_sk_st = F.interpolate(real_1_sk_st, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_2_sk_st = F.interpolate(real_2_sk_st, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_1_sk_st[real_1_sk_st != real_1_sk_st] = 0
+        real_1_sk_st = (real_1_sk_st - real_1_sk_st.min()) / (real_1_sk_st.max() - real_1_sk_st.min())
+        real_2_sk_st[real_2_sk_st != real_2_sk_st] = 0
+        real_2_sk_st = (real_2_sk_st - real_2_sk_st.min()) / (real_2_sk_st.max() - real_2_sk_st.min())
+        real_1_sk_st = real_1_sk_st[0, 0, :, :, :]
+        real_2_sk_st = real_2_sk_st[0,0,:,:,:]
 
         real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
         real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
