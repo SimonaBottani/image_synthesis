@@ -38,15 +38,16 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         # Inputs T1-w and T2-w
         real_1 = Variable(batch["image_1"].type(Tensor), requires_grad=False)
         real_2 = Variable(batch["image_2"].type(Tensor), requires_grad=False)
-
-        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
-        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        print('testing on 169, 208, 179')
+        #real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        #real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
         real_1[real_1 != real_1] = 0
         real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
         real_2[real_2 != real_2] = 0
         real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
         fake_2 = Variable(generator(real_1), requires_grad=False)
+        fake_2 = F.interpolate(fake_2, size=(169, 208, 179), mode='trilinear', align_corners=False)
 
         ## create mask for the metrics
 
