@@ -24,6 +24,9 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
     res_mae = []
     res_pnsr = []
     res_ssim = []
+    res_mae_12 = []
+    res_pnsr_12 = []
+    res_ssim_12 = []
     participant_id = []
     session_id = []
 
@@ -67,7 +70,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         real_2_masked[mask == 0] = 0
         fake_2_masked[mask == 0] = 0
 
-
+        real_1_masked = copy.deepcopy(real_1)
+        real_1_masked[mask == 0] = 0
 
         mae = mean_absolute_error(real_2_masked, fake_2_masked).item()
         psnr = peak_signal_to_noise_ratio(real_2_masked, fake_2_masked).item()
@@ -78,6 +82,12 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         participant_id.append(batch['participant_id'][0]) ###batch size must be 1 !!
         session_id.append(batch['session_id_2'][0])
 
+        mae = mean_absolute_error(real_2_masked, real_1_masked).item()
+        psnr = peak_signal_to_noise_ratio(real_2_masked, real_1_masked).item()
+        ssim = structural_similarity_index(real_2_masked, real_1_masked).item()
+        res_mae_12.append(mae)
+        res_pnsr_12.append(psnr)
+        res_ssim_12.append(ssim)
 
         #res.append([mae, psnr, ssim])
 
@@ -86,6 +96,7 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
     #    pd.DataFrame(res, columns=['MAE', 'PSNR', 'SSIM']).mean().squeeze()
     #], index=[modality]).T
     df = pd.DataFrame(data = {'MAE':res_mae, 'PSNR':res_pnsr, 'SSIM': res_ssim,
+                              'MAE_12': res_mae_12, 'PSNR_12': res_pnsr_12, 'SSIM_12': res_ssim_12,
                              'participant_id': participant_id, 'session_id': session_id})
 
 
