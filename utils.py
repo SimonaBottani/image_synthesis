@@ -295,7 +295,7 @@ class MRIDatasetImage(MRIDataset):
         participant, session_1, session_2, _, label_1, label_2 = self._get_meta_data_paired_images(idx)
 
         image_path_1 = self._get_path(participant, session_1, "image")
-        image_path_1_skull_strip = path.join(self.caps_directory, 'subjects', participant, participant,
+        image_path_1_skull_strip = path.join(self.caps_directory, 'subjects', participant, session_1,
                                'deeplearning_prepare_data', '%s_based' % 'image', 't1_linear',
                                participant + '_' + session_1
                                + '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_skull-skripped-hdbet_T1w.pt')
@@ -305,7 +305,7 @@ class MRIDatasetImage(MRIDataset):
         image_path_1_skull_strip = torch.load(image_path_1_skull_strip)
 
         image_path_2 = self._get_path(participant, session_2, "image")
-        image_path_2_skull_strip = path.join(self.caps_directory, 'subjects', participant, participant,
+        image_path_2_skull_strip = path.join(self.caps_directory, 'subjects', participant, session_2,
                                'deeplearning_prepare_data', '%s_based' % 'image', 't1_linear',
                                participant + '_' + session_2
                                + '_T1w_space-MNI152NLin2009cSym_desc-Crop_res-1x1x1_skull-skripped-hdbet_T1w.pt')
