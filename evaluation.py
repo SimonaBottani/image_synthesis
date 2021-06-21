@@ -42,8 +42,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         ####### READ the Skull-stripped iamges to create the mask - in 169-208-179
         real_1_sk_st = Variable(batch["image_path_1_skull_strip"].type(Tensor), requires_grad=False)
         real_2_sk_st = Variable(batch["image_path_2_skull_strip"].type(Tensor), requires_grad=False)
-        real_1_sk_st = F.interpolate(real_1_sk_st, size=(128, 128, 128), mode='trilinear', align_corners=False)
-        real_2_sk_st = F.interpolate(real_2_sk_st, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        #real_1_sk_st = F.interpolate(real_1_sk_st, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        #real_2_sk_st = F.interpolate(real_2_sk_st, size=(128, 128, 128), mode='trilinear', align_corners=False)
         real_1_sk_st[real_1_sk_st != real_1_sk_st] = 0
         real_1_sk_st = (real_1_sk_st - real_1_sk_st.min()) / (real_1_sk_st.max() - real_1_sk_st.min())
         real_2_sk_st[real_2_sk_st != real_2_sk_st] = 0
@@ -61,9 +61,9 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         fake_2 = Variable(generator(real_1), requires_grad=False)
 
         print('testing on 169, 208, 179')
-        #real_1 = F.interpolate(real_1, size=(169, 208, 179), mode='trilinear', align_corners=False)
-        #real_2 = F.interpolate(real_2, size=(169, 208, 179), mode='trilinear', align_corners=False)
-        #fake_2 = F.interpolate(fake_2, size=(169, 208, 179), mode='trilinear', align_corners=False)
+        real_1 = F.interpolate(real_1, size=(169, 208, 179), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(169, 208, 179), mode='trilinear', align_corners=False)
+        fake_2 = F.interpolate(fake_2, size=(169, 208, 179), mode='trilinear', align_corners=False)
 
         ## create mask for the metrics
 
