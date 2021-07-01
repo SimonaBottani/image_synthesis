@@ -404,54 +404,52 @@ class RRCNN_block(nn.Module):
         x1 = self.RCNN(x)
         return x + x1
 
-class R2U_Net(nn.Module):
-    """
-    Inspired from R2U_Net
-    (https://github.com/LeeJunHyun/Image_Segmentation)
 
-    """
-    def __init__(self, in_channels=1, out_channels=1,t=2):
+class R2U_Net(nn.Module):
+    def __init__(self, img_ch=1, output_ch=1, t=2):
         super(R2U_Net, self).__init__()
 
         self.Maxpool = nn.MaxPool3d(kernel_size=2, stride=2)
+        self.Upsample = nn.Upsample(scale_factor=2)
 
-        self.RRCNN1 = RRCNN_block(ch_in=in_channels, ch_out=128, t=t)
-        self.RRCNN2 = RRCNN_block(ch_in=128, ch_out=256, t=t)
-        self.RRCNN3 = RRCNN_block(ch_in=256, ch_out=512, t=t)
-        self.RRCNN4 = RRCNN_block(ch_in=512, ch_out=1024, t=t)
-        self.RRCNN5 = RRCNN_block(ch_in=1024, ch_out=2048, t=t)
+        self.RRCNN1 = RRCNN_block(ch_in=img_ch, ch_out=64, t=t)
 
-        self.Up5 = up_conv(ch_in=2048, ch_out=1024)
-        self.Up_RRCNN5 = RRCNN_block(ch_in=2048, ch_out=1024, t=t)
+        self.RRCNN2 = RRCNN_block(ch_in=64, ch_out=128, t=t)
 
-        self.Up4 = up_conv(ch_in=1024, ch_out=512)
-        self.Up_RRCNN4 = RRCNN_block(ch_in=1024, ch_out=512, t=t)
+        self.RRCNN3 = RRCNN_block(ch_in=128, ch_out=256, t=t)
 
-        self.Up3 = up_conv(ch_in=512, ch_out=256)
-        self.Up_RRCNN3 = RRCNN_block(ch_in=512, ch_out=256, t=t)
+        self.RRCNN4 = RRCNN_block(ch_in=256, ch_out=512, t=t)
 
+        self.RRCNN5 = RRCNN_block(ch_in=512, ch_out=1024, t=t)
 
-        self.Up2 = up_conv(ch_in=256, ch_out=128)
-        self.Up_RRCNN2 = RRCNN_block(ch_in=256, ch_out=128, t=t)
+        self.Up5 = up_conv(ch_in=1024, ch_out=512)
+        self.Up_RRCNN5 = RRCNN_block(ch_in=1024, ch_out=512, t=t)
 
-        self.Conv_1x1 = nn.Conv2d(128, out_channels, kernel_size=1, stride=1, padding=0)
+        self.Up4 = up_conv(ch_in=512, ch_out=256)
+        self.Up_RRCNN4 = RRCNN_block(ch_in=512, ch_out=256, t=t)
 
+        self.Up3 = up_conv(ch_in=256, ch_out=128)
+        self.Up_RRCNN3 = RRCNN_block(ch_in=256, ch_out=128, t=t)
 
+        self.Up2 = up_conv(ch_in=128, ch_out=64)
+        self.Up_RRCNN2 = RRCNN_block(ch_in=128, ch_out=64, t=t)
+
+        self.Conv_1x1 = nn.Conv3d(64, output_ch, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
         # encoding path
         x1 = self.RRCNN1(x)
+
         x2 = self.Maxpool(x1)
-
         x2 = self.RRCNN2(x2)
+
         x3 = self.Maxpool(x2)
-
         x3 = self.RRCNN3(x3)
+
         x4 = self.Maxpool(x3)
-
         x4 = self.RRCNN4(x4)
-        x5 = self.Maxpool(x4)
 
+        x5 = self.Maxpool(x4)
         x5 = self.RRCNN5(x5)
 
         # decoding + concat path
@@ -474,7 +472,6 @@ class R2U_Net(nn.Module):
         d1 = self.Conv_1x1(d2)
 
         return d1
-
 
 
 class conv_block(nn.Module):
