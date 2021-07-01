@@ -358,7 +358,8 @@ def train_cgan(train_loader, test_loader, output_results,
 def train_generator(train_loader, test_loader, output_results,
                     caps_dir, model_generator,
                     num_epoch=500,
-                    lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None):
+                    lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None,
+                    input_dim=128):
     """Train a generator on its own.
 
     Args:
@@ -410,8 +411,8 @@ def train_generator(train_loader, test_loader, output_results,
         real_2 = Variable(imgs["image_2"].type(Tensor))
 
         ### reshape image
-        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
-        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_1 = F.interpolate(real_1, size=(input_dim, input_dim, input_dim), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(input_dim, input_dim, input_dim), mode='trilinear', align_corners=False)
 
         real_1[real_1 != real_1] = 0
         real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
@@ -461,8 +462,8 @@ def train_generator(train_loader, test_loader, output_results,
             real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
 
             ### Reshape input ###
-            real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
-            real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
+            real_1 = F.interpolate(real_1, size=(input_dim, input_dim, input_dim), mode='trilinear', align_corners=False)
+            real_2 = F.interpolate(real_2, size=(input_dim, input_dim, input_dim), mode='trilinear', align_corners=False)
 
 
             # Remove stored gradients

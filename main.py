@@ -94,6 +94,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--input_dim',
+    type=float,
+    default=128,
+    help='trilinear interpolation of input, i.e. 128/64'
+)
+parser.add_argument(
     '--skull_strip',
     type=str,
     default='skull_strip',
@@ -148,6 +154,7 @@ num_workers = 2
 skull_strip = args.skull_strip
 n_gpu = args.n_gpu
 model_generator = args.generator_name
+input_dim = args.input_dim
 
 
 
@@ -216,7 +223,6 @@ for fi in fold_iterator:
             print('i am here')
             model_generator = GeneratorUNetResMod()
         elif model_generator == ['GeneratorUNet']:
-            print('not i am here')
             model_generator = GeneratorUNet()
         elif model_generator == ['R2U_Net']:
             model_generator = R2U_Net()
@@ -229,7 +235,8 @@ for fi in fold_iterator:
         generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
                                     model_generator,
                                    num_epoch,
-                                   lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip)
+                                   lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip,
+                                    input_dim=128)
 
     elif model == ['conditional_gan']:
         if model_generator == ['GeneratorUNetResMod']:

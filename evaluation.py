@@ -12,7 +12,8 @@ from metrics import *
 import numpy as np
 import copy
 
-def evaluate_generator(generator, batch_loader, output_results_fold, modality='train'):
+def evaluate_generator(generator, batch_loader, output_results_fold, modality='train',
+                       input_dim=128):
     """Evaluate a generator.
 
     Args:
@@ -51,8 +52,8 @@ def evaluate_generator(generator, batch_loader, output_results_fold, modality='t
         real_1_sk_st = real_1_sk_st[0, 0, :, :, :]
         real_2_sk_st = real_2_sk_st[0, 0, :, :, :]
 
-        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
-        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_1 = F.interpolate(real_1, size=(input_dim, input_dim, input_dim), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(input_dim, input_dim, input_dim), mode='trilinear', align_corners=False)
         real_1[real_1 != real_1] = 0
         real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
         real_2[real_2 != real_2] = 0

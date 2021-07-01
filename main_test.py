@@ -84,7 +84,12 @@ parser.add_argument(
     default='GeneratorUNet', nargs='+', type=str,
     choices=['GeneratorUNet', 'GeneratorUNetResMod']
 )
-
+parser.add_argument(
+    '--input_dim',
+    type=float,
+    default=128,
+    help='trilinear interpolation of input, i.e. 128/64'
+)
 parser.add_argument(
     '--n_gpu',
     type=int,
@@ -132,7 +137,7 @@ n_gpu = args.n_gpu
 model_generator = args.generator_name
 real_im_exists = args.real_im_exists
 name_test_folder = args.name_test_folder
-
+input_dim = args.input_dim
 
 
 
@@ -175,6 +180,12 @@ for fi in fold_iterator:
             model_generator = GeneratorUNetResMod()
         elif model_generator == ['GeneratorUNet']:
             model_generator = GeneratorUNet()
+        elif model_generator == ['R2U_Net']:
+            model_generator = R2U_Net()
+        elif model_generator == ['AttU_Net']:
+            model_generator = AttU_Net()
+        elif model_generator == ['R2AttU_Net']:
+            model_generator = R2AttU_Net()
 
         generator = model_generator
         if cuda:
@@ -185,7 +196,8 @@ for fi in fold_iterator:
                                              'model_best.pth.tar'), map_location="cpu")
         generator.load_state_dict(param_dict['model'])
 
-        evaluate_generator(generator, test_loader, output_results_fold, modality='test')
+        evaluate_generator(generator, test_loader, output_results_fold, modality='test',
+                           input_dim=128)
 
     ### save images
     print('save files')
