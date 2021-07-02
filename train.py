@@ -478,6 +478,7 @@ def train_generator(train_loader, test_loader, output_results,
             # Compute the gradient and perform one optimization step
             loss.backward()
             optimizer.step()
+            optimizer.zero_grad()
 
             # --------------
             #  Log Progress
