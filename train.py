@@ -479,6 +479,7 @@ def train_generator(train_loader, test_loader, output_results,
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
+            del loss
 
             # --------------
             #  Log Progress
