@@ -450,6 +450,7 @@ def train_generator(train_loader, test_loader, output_results,
     prev_time = time.time()
 
     for epoch in range(num_epoch):
+        print('this epoch')
         for i, batch in enumerate(train_loader):
 
             # Inputs T1-w and T2-w
@@ -519,7 +520,8 @@ def train_generator(train_loader, test_loader, output_results,
         # Save results at the end of each epoch and images each 20 epochs
         if epoch % 20 == 0:
             sample_images(epoch)
-        loss_valid = write_validation_tsv(epoch, test_loader, output_results, generator, criterion)
+        loss_valid = write_validation_tsv(epoch, test_loader, output_results, generator, criterion,
+                                          input_dim)
 
         loss_is_best = loss_valid < best_valid_loss
         best_valid_loss = min(loss_valid, best_valid_loss)
