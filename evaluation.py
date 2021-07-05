@@ -171,7 +171,8 @@ def sample_images_testing(generator, test_loader, caps_dir, output_results, skul
             batch['participant_id'][0] + '_' + batch['session_id_2'][0] + '_reconstructed.nii.gz'))
 
 
-def write_validation_tsv(epoch, valid_loader, output_results, generator, criterion):
+def write_validation_tsv(epoch, valid_loader, output_results, generator, criterion,
+                         input_dim):
     """
 
     :param epoch: epoch
@@ -196,16 +197,16 @@ def write_validation_tsv(epoch, valid_loader, output_results, generator, criteri
         
 
         ### reshape image
-        real_1 = F.interpolate(real_1, size=(128, 128, 128), mode='trilinear', align_corners=False)
-        real_2 = F.interpolate(real_2, size=(128, 128, 128), mode='trilinear', align_corners=False)
+        real_1 = F.interpolate(real_1, size=(input_dim, input_dim, input_dim), mode='trilinear', align_corners=False)
+        real_2 = F.interpolate(real_2, size=(input_dim, input_dim, input_dim), mode='trilinear', align_corners=False)
 
         real_1[real_1 != real_1] = 0
         real_1 = (real_1 - real_1.min()) / (real_1.max() - real_1.min())
         real_2[real_2 != real_2] = 0
         real_2 = (real_2 - real_2.min()) / (real_2.max() - real_2.min())
-
-        fake_2 = generator(real_1)
-        loss = criterion(fake_2, real_2)
+        with torch.no_grad():
+            fake_2 = generator(real_1)
+            loss = criterion(fake_2, real_2)
 
 
     row = np.array(
