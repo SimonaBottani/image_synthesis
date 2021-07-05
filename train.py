@@ -538,6 +538,7 @@ def train_generator(train_loader, test_loader, output_results,
                         model_dir,
                         filename='optimizer.pth.tar')
         del loss
+        optimizer.zero_grad()
     return generator
 
 def train_cyclegan(train_loader, test_loader, output_results,
