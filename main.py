@@ -26,7 +26,7 @@ import time
 from train import train_cgan, train_generator, train_cyclegan
 from utils import *
 from evaluation import *
-from models import GeneratorUNet, Discriminator, DiscriminatorCycle, GeneratorUNetResMod, R2AttU_Net, AttU_Net, R2U_Net
+from models import GeneratorUNet, Discriminator, DiscriminatorCycle, GeneratorUNetResMod, R2AttU_Net, AttU_Net, R2U_Net, BTS
 
 
 
@@ -61,7 +61,7 @@ parser.add_argument(
     help='Name of the type of the model used',
     default='GeneratorUNet', nargs='+', type=str,
     choices=['GeneratorUNet', 'GeneratorUNetResMod', 'AttU_Net',
-             'R2AttU_Net', 'R2U_Net']
+             'R2AttU_Net', 'R2U_Net', 'TransUNet']
 )
 
 
@@ -230,6 +230,21 @@ for fi in fold_iterator:
             model_generator = AttU_Net()
         elif model_generator == ['R2AttU_Net']:
             model_generator = R2AttU_Net()
+        elif model_generator == ['TransUNet']:
+            print('Trying Transformer')
+            model_generator = BTS(img_dim=128,
+                                  patch_dim=8,
+                                  num_channels=1,
+                                  num_classes=1,
+                                  embedding_dim=512,
+                                  num_heads=8,
+                                  num_layers=4,
+                                  hidden_dim=4096,
+                                  dropout_rate=0.1,
+                                  attn_dropout_rate=0.1,
+                                  conv_patch_representation=True,
+                                  positional_encoding_type="learned",
+                                  )
 
 
         generator = train_generator(train_loader, valid_loader, output_results_fold, input_dir,
@@ -245,6 +260,9 @@ for fi in fold_iterator:
         elif model_generator == ['GeneratorUNet']:
             print(model_generator)
             model_generator = GeneratorUNet()
+        elif model_generator == ['AttU_Net']:
+            print(model_generator)
+            model_generator = AttU_Net()
 
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
                             model_generator,
