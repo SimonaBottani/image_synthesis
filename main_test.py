@@ -82,7 +82,7 @@ parser.add_argument(
     '--generator_name',
     help='Name of the type of the model used',
     default='GeneratorUNet', nargs='+', type=str,
-    choices=['GeneratorUNet', 'GeneratorUNetResMod', 'AttU_Net']
+    choices=['GeneratorUNet', 'GeneratorUNetResMod', 'AttU_Net', 'TransUNet']
 )
 parser.add_argument(
     '--input_dim',
@@ -186,6 +186,20 @@ for fi in fold_iterator:
             model_generator = AttU_Net()
         elif model_generator == ['R2AttU_Net']:
             model_generator = R2AttU_Net()
+        elif model_generator == ['TransUNet']:
+            model_generator = BTS(img_dim=128,
+                                  patch_dim=8,
+                                  num_channels=1,
+                                  num_classes=1,
+                                  embedding_dim=512,
+                                  num_heads=8,
+                                  num_layers=4,
+                                  hidden_dim=4096,
+                                  dropout_rate=0.1,
+                                  attn_dropout_rate=0.1,
+                                  conv_patch_representation=True,
+                                  positional_encoding_type="learned",
+                                  )
 
         generator = model_generator
         if cuda:
