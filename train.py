@@ -70,8 +70,8 @@ def train_cgan(train_loader, test_loader, output_results,
     lambda_pixel = 1.  # Weights criterion_pixelwise in the generator loss
 
     # Initialize generator and discriminator
-    generator = model_generator   # To complete
-    discriminator = Discriminator() # To complete
+    generator = model_generator
+    discriminator = Discriminator()
 
     if cuda:
         generator = generator.cuda()
@@ -162,8 +162,8 @@ def train_cgan(train_loader, test_loader, output_results,
 
             # GAN loss
             fake_2 = generator(real_1)  # To complete
-            #pred_fake = discriminator(fake_2, real_1)
-            #loss_GAN = criterion_GAN(pred_fake, valid)
+            pred_fake = discriminator(fake_2, real_1)
+            loss_GAN = criterion_GAN(pred_fake, valid)
 
             # L1 loss
             loss_pixel = criterion_pixelwise(fake_2, real_2)
@@ -179,11 +179,11 @@ def train_cgan(train_loader, test_loader, output_results,
             #  Train Discriminator
             # ---------------------
 
-            #optimizer_discriminator.zero_grad()
+            optimizer_discriminator.zero_grad()
 
             # Real loss
-            #pred_real = discriminator(real_2, real_1)   # To complete
-            #loss_real = criterion_GAN(pred_real, valid)  # To complete
+            pred_real = discriminator(real_2, real_1)   # To complete
+            loss_real = criterion_GAN(pred_real, valid)  # To complete
 
             # Fake loss
             #fake_2 = generator(real_1)
