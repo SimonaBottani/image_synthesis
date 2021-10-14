@@ -282,6 +282,8 @@ def train_cgan(train_loader, test_loader, output_results,
             loss_is_best = loss_valid < best_valid_loss
             best_valid_loss = min(loss_valid, best_valid_loss)
 
+        print('here is stiiiil the loss valid')
+        
         save_checkpoint({'model': discriminator.state_dict(),
                          'epoch': epoch,
                          'valid_loss': loss_valid},
