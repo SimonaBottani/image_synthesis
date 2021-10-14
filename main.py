@@ -64,6 +64,12 @@ parser.add_argument(
              'R2AttU_Net', 'R2U_Net', 'TransUNet']
 )
 
+parser.add_argument(
+    '--generator_pretrained',
+    help='Path to the pretrained generator',
+    default='.', nargs='+', type=str,
+)
+
 
 parser.add_argument(
         '--n_epoch',
@@ -128,6 +134,7 @@ parser.add_argument(
 )
 
 
+
 args = parser.parse_args()
 
 ## write command line arguments on json
@@ -155,6 +162,7 @@ skull_strip = args.skull_strip
 n_gpu = args.n_gpu
 model_generator = args.generator_name
 input_dim = args.input_dim
+generator_pretrained = args.generator_pretrained
 
 
 
@@ -263,6 +271,29 @@ for fi in fold_iterator:
         elif model_generator == ['AttU_Net']:
             print(model_generator)
             model_generator = AttU_Net()
+        elif model_generator == ['TransUNet']:
+            print(model_generator)
+            model_generator = BTS(img_dim=128,
+                                  patch_dim=8,
+                                  num_channels=1,
+                                  num_classes=1,
+                                  embedding_dim=512,
+                                  num_heads=8,
+                                  num_layers=4,
+                                  hidden_dim=4096,
+                                  dropout_rate=0.1,
+                                  attn_dropout_rate=0.1,
+                                  conv_patch_representation=True,
+                                  positional_encoding_type="learned",
+                                  )
+        ## if model == 'conditional_gan' load generator already trained
+
+        param_dict = torch.load(os.path.join(output_results_fold, 'fold-0/generator/best_loss',
+                                             'model_best.pth.tar'), map_location="cpu")
+        model_generator.load_state_dict(param_dict['model'])
+        print('model uploaded')
+
+
 
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
                             model_generator,
