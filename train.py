@@ -49,7 +49,7 @@ def train_cgan(train_loader, test_loader, output_results,
     Returns:
         generator: (nn.Module) the trained generator
     """
-
+    best_valid_loss = np.inf
     columns = ['epoch', 'batch', 'loss_discriminator', 'loss_generator', 'loss_pixel', 'loss_GAN']
     filename = os.path.join(output_results, 'training.tsv')
 
