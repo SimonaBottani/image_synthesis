@@ -55,6 +55,9 @@ def train_cgan(train_loader, test_loader, output_results,
     cuda = True if torch.cuda.is_available() else False
     print(f"Using cuda device: {cuda}")  # check if GPU is used
 
+    model_dir_generator = os.path.join(output_results, 'generator')
+    model_dir_discriminator = os.path.join(output_results, 'discriminator')
+
     # Tensor type (put everything on GPU if possible)
     Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
@@ -159,22 +162,25 @@ def train_cgan(train_loader, test_loader, output_results,
             # -----------------
             #  Train Generator
             # -----------------
-            optimizer_generator.zero_grad()
 
-            # GAN loss
-            fake_2 = generator(real_1)  # To complete
-            pred_fake = discriminator(fake_2, real_1)
-            loss_GAN = criterion_GAN(pred_fake, valid) ## change with fake
+            if train_generator == True:
 
-            # L1 loss
-            loss_pixel = criterion_pixelwise(fake_2, real_2)
+                optimizer_generator.zero_grad()
 
-            # Total loss
-            loss_generator = lambda_GAN * loss_GAN + lambda_pixel * loss_pixel
+                # GAN loss
+                fake_2 = generator(real_1)  # To complete
+                pred_fake = discriminator(fake_2, real_1)
+                loss_GAN = criterion_GAN(pred_fake, valid) ## change with fake
 
-            # Compute the gradient and perform one optimization step
-            loss_generator.backward()
-            optimizer_generator.step()
+                # L1 loss
+                loss_pixel = criterion_pixelwise(fake_2, real_2)
+
+                # Total loss
+                loss_generator = lambda_GAN * loss_GAN + lambda_pixel * loss_pixel
+
+                # Compute the gradient and perform one optimization step
+                loss_generator.backward()
+                optimizer_generator.step()
 
             # ---------------------
             #  Train Discriminator
@@ -241,6 +247,54 @@ def train_cgan(train_loader, test_loader, output_results,
         if epoch % 20 == 0:
             sample_images(epoch)
 
+        ###### save generator
+
+        if train_generator == True:
+
+            loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_pixelwise,
+                                              128)
+
+
+            loss_is_best = loss_valid < best_valid_loss
+            best_valid_loss = min(loss_valid, best_valid_loss)
+
+            save_checkpoint({'model': generator.state_dict(),
+                             'epoch': epoch,
+                             'valid_loss': loss_valid},
+                            loss_is_best,
+                            model_dir_generator)
+            # Save optimizer state_dict to be able to reload
+            save_checkpoint({'optimizer': optimizer_generator.state_dict(),
+                             'epoch': epoch,
+                             'name': loss_valid,
+                             },
+                            False,
+                            model_dir_generator,
+                            filename='optimizer.pth.tar')
+            del loss_valid
+            optimizer_generator.zero_grad()
+
+        else:
+            loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_GAN,
+                                              128)
+            loss_is_best = loss_valid < best_valid_loss
+            best_valid_loss = min(loss_valid, best_valid_loss)
+
+        save_checkpoint({'model': discriminator.state_dict(),
+                         'epoch': epoch,
+                         'valid_loss': loss_valid},
+                        loss_is_best,
+                        model_dir_discriminator)
+        # Save optimizer state_dict to be able to reload
+        save_checkpoint({'optimizer': optimizer_discriminator.state_dict(),
+                         'epoch': epoch,
+                         'name': loss_valid,
+                         },
+                        False,
+                        model_dir_discriminator,
+                        filename='optimizer.pth.tar')
+        del loss_valid
+        optimizer_discriminator.zero_grad()
 
     return generator
 
