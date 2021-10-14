@@ -132,7 +132,12 @@ parser.add_argument(
     default=3,
     help='number_id_gpu'
 )
-
+parser.add_argument(
+    '--train_generator',
+    type=str,
+    default='train_generator',
+    help='train generator yes or not '
+)
 
 
 args = parser.parse_args()
@@ -163,6 +168,13 @@ n_gpu = args.n_gpu
 model_generator = args.generator_name
 input_dim = args.input_dim
 generator_pretrained = args.generator_pretrained
+train_gen = args.train_generator
+
+
+if train_gen == 'train_generator':
+    train_gen = True
+else:
+    train_gen = False
 
 
 
@@ -294,12 +306,14 @@ for fi in fold_iterator:
         model_generator.load_state_dict(param_dict['model'])
         print('model uploaded')
 
+        print('Should I train gen? ' + str(train_gen))
 
 
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
                             model_generator,
                                num_epoch,
-                                lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip)
+                                lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip,
+                               train_gen=train_gen)
 
     elif model == ['cycle_gan']:
         generator = train_cyclegan(train_loader, valid_loader,output_results_fold, input_dir,
