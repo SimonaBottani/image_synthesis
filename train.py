@@ -217,30 +217,50 @@ def train_cgan(train_loader, test_loader, output_results,
             prev_time = time.time()
 
             # Print log
-            sys.stdout.write(
-                "\r[Epoch %d/%d] [Batch %d/%d] [D loss: %f] "
-                "[G loss: %f, pixel: %f, adv: %f] ETA: %s"
-                % (
-                    epoch + 1,
-                    num_epoch,
-                    i,
-                    len(train_loader),
-                    loss_discriminator.item(),
-                    loss_generator.item(),
-                    loss_pixel.item(),
-                    loss_GAN.item(),
-                    time_left,
+            if train_gen == True:
+                sys.stdout.write(
+                    "\r[Epoch %d/%d] [Batch %d/%d] [D loss: %f] "
+                    "[G loss: %f, pixel: %f, adv: %f] ETA: %s"
+                    % (
+                        epoch + 1,
+                        num_epoch,
+                        i,
+                        len(train_loader),
+                        loss_discriminator.item(),
+                        loss_generator.item(),
+                        loss_pixel.item(),
+                        loss_GAN.item(),
+                        time_left,
+                    )
                 )
-            )
+            else:
+                sys.stdout.write(
+                    "\r[Epoch %d/%d] [Batch %d/%d] [D loss: %f] "
+                    " ETA: %s"
+                    % (
+                        epoch + 1,
+                        num_epoch,
+                        i,
+                        len(train_loader),
+                        loss_discriminator.item(),
+                        time_left,
+                    )
+                )
 
         # Save images at the end of each epoch
-
-        columns = ['epoch', 'batch', 'loss_discriminator', 'loss_generator', 'loss_pixel', 'loss_GAN']
-        row = np.array(
+        if train_gen == True:
+            columns = ['epoch', 'batch', 'loss_discriminator', 'loss_generator', 'loss_pixel', 'loss_GAN']
+            row = np.array(
             [epoch + 1, i, loss_discriminator.item(), loss_generator.item(),
             loss_pixel.item(),
              loss_GAN.item()]
-        ).reshape(1, -1)
+            ).reshape(1, -1)
+        else:
+            columns = ['epoch', 'batch', 'loss_discriminator']
+            row = np.array(
+            [epoch + 1, i, loss_discriminator.item()]
+            ).reshape(1, -1)
+
         row_df = pd.DataFrame(row, columns=columns)
         with open(filename, 'a') as f:
             row_df.to_csv(f, header=True, index=False, sep='\t')
