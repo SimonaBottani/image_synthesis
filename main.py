@@ -287,9 +287,9 @@ for fi in fold_iterator:
                                   positional_encoding_type="learned",
                                   )
         ## if model == 'conditional_gan' load generator already trained
-        print(generator_pretrained)
+        print(generator_pretrained[0])
 
-        param_dict = torch.load(os.path.join(generator_pretrained, 'fold-0/generator/best_loss',
+        param_dict = torch.load(os.path.join(generator_pretrained[0], 'fold-0/generator/best_loss',
                                              'model_best.pth.tar'), map_location="cpu")
         model_generator.load_state_dict(param_dict['model'])
         print('model uploaded')
