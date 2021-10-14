@@ -254,7 +254,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
             loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_pixelwise,
                                               128)
-
+            print('this is the loss valid: ')
 
             loss_is_best = loss_valid < best_valid_loss
             best_valid_loss = min(loss_valid, best_valid_loss)
@@ -276,6 +276,7 @@ def train_cgan(train_loader, test_loader, output_results,
             optimizer_generator.zero_grad()
 
         elif train_gen == False:
+            print('if i am here its a mistake')
             loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_GAN,
                                               128)
             loss_is_best = loss_valid < best_valid_loss
