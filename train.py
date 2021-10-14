@@ -275,7 +275,7 @@ def train_cgan(train_loader, test_loader, output_results,
             del loss_valid
             optimizer_generator.zero_grad()
 
-        else:
+        elif train_gen == False:
             loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_GAN,
                                               128)
             loss_is_best = loss_valid < best_valid_loss
