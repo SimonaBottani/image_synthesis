@@ -33,7 +33,8 @@ import nibabel as nib
 def train_cgan(train_loader, test_loader, output_results,
                 caps_dir, model_generator,
                num_epoch=500,
-               lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None):
+               lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None,
+               train_gen=True):
     """Train a conditional GAN.
 
     Args:
@@ -163,7 +164,7 @@ def train_cgan(train_loader, test_loader, output_results,
             #  Train Generator
             # -----------------
 
-            if train_generator == True:
+            if train_gen == True:
 
                 optimizer_generator.zero_grad()
 
@@ -249,7 +250,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
         ###### save generator
 
-        if train_generator == True:
+        if train_gen == True:
 
             loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_pixelwise,
                                               128)
