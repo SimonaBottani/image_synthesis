@@ -31,7 +31,7 @@ import nibabel as nib
 
 
 def train_cgan(train_loader, test_loader, output_results,
-                caps_dir, model_generator,
+                caps_dir, model_generator, discriminator,
                num_epoch=500,
                lr=0.0001, beta1=0.9, beta2=0.999, skull_strip=None,
                train_gen=True):
@@ -75,7 +75,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
     # Initialize generator and discriminator
     generator = model_generator
-    discriminator = Discriminator()
+
 
     if cuda:
         generator = generator.cuda()
@@ -254,7 +254,6 @@ def train_cgan(train_loader, test_loader, output_results,
 
             loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_pixelwise,
                                               128)
-            print('this is the loss valid: ')
 
             loss_is_best = loss_valid < best_valid_loss
             best_valid_loss = min(loss_valid, best_valid_loss)
@@ -276,7 +275,6 @@ def train_cgan(train_loader, test_loader, output_results,
             optimizer_generator.zero_grad()
 
         elif train_gen == False:
-            print('if i am here its a mistake')
             loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_GAN,
                                               128)
             loss_is_best = loss_valid < best_valid_loss

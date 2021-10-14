@@ -70,6 +70,11 @@ parser.add_argument(
     default='.', nargs='+', type=str,
 )
 
+parser.add_argument(
+    '--discriminator_pretrained',
+    help='Path to the pretrained discriminator',
+    default='.', nargs='+', type=str,
+)
 
 parser.add_argument(
         '--n_epoch',
@@ -140,6 +145,7 @@ parser.add_argument(
 )
 
 
+
 args = parser.parse_args()
 
 ## write command line arguments on json
@@ -168,6 +174,8 @@ n_gpu = args.n_gpu
 model_generator = args.generator_name
 input_dim = args.input_dim
 generator_pretrained = args.generator_pretrained
+discriminator_pretrained = args.discriminator_pretrained
+
 train_gen = args.train_generator
 
 
@@ -304,13 +312,25 @@ for fi in fold_iterator:
         param_dict = torch.load(os.path.join(generator_pretrained[0], 'fold-0/generator/best_loss',
                                              'model_best.pth.tar'), map_location="cpu")
         model_generator.load_state_dict(param_dict['model'])
-        print('model uploaded')
+        print('Model generator uploaded')
 
-        print('Should I train gen? ' + str(train_gen))
+        print(discriminator_pretrained[0])
+
+        if discriminator_pretrained != ['False']:
+            print('Loading discriminator')
+            model_discriminator = Discriminator()
+            param_dict = torch.load(os.path.join(discriminator_pretrained[0], 'fold-0/discriminator/best_loss',
+                                             'model_best.pth.tar'), map_location="cpu")
+            model_discriminator.load_state_dict(param_dict['model'])
+            print('Model discriminator uploaded')
+        elif discriminator_pretrained == ['False']:
+            model_discriminator = Discriminator()
+
+
 
 
         generator = train_cgan(train_loader, valid_loader,output_results_fold, input_dir,
-                            model_generator,
+                            model_generator, model_discriminator,
                                num_epoch,
                                 lr=lr, beta1=beta1, beta2=beta2, skull_strip=skull_strip,
                                train_gen=train_gen)
