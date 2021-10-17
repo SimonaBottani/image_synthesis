@@ -155,10 +155,16 @@ def train_cgan(train_loader, test_loader, output_results,
 
 
             # Create labels
-            valid = Variable(Tensor(np.ones((real_2.size(0), 1, 1, 1, 1))),
+            #valid = Variable(Tensor(np.ones((real_2.size(0), 1, 1, 1, 1))),
+            #                 requires_grad=False)
+            ##soft label
+            valid = Variable(Tensor((0.3) * torch.rand((real_2.size(0), 1, 1, 1, 1)) ),
                              requires_grad=False)
-            fake = Variable(Tensor(np.zeros((real_2.size(0), 1, 1, 1, 1))),
-                            requires_grad=False)
+            fake = Variable(Tensor((1 - 0.7) * torch.rand((real_2.size(0), 1, 1, 1, 1)) + 0.7),
+                             requires_grad=False)
+
+            #fake = Variable(Tensor(np.zeros((real_2.size(0), 1, 1, 1, 1))),
+            #                requires_grad=False)
 
             # -----------------
             #  Train Generator
@@ -172,7 +178,7 @@ def train_cgan(train_loader, test_loader, output_results,
                 fake_2 = generator(real_1)  # To complete
                 pred_fake = discriminator(fake_2, real_1)
 
-                loss_GAN = criterion_GAN(pred_fake, fake) ## change with fake
+                loss_GAN = criterion_GAN(pred_fake, valid) ## change with fake
 
                 # L1 loss
                 loss_pixel = criterion_pixelwise(fake_2, real_2)
