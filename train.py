@@ -158,9 +158,13 @@ def train_cgan(train_loader, test_loader, output_results,
             #valid = Variable(Tensor(np.ones((real_2.size(0), 1, 1, 1, 1))),
             #                 requires_grad=False)
             ##soft label
-            valid = Variable(Tensor((0.3) * torch.rand((real_2.size(0), 1, 1, 1, 1))), device=cuda,
+            n = (0.3) * torch.rand((real_2.size(0), 1, 1, 1, 1))
+            n = torch.Tensor(n, device=cuda)
+            valid = Variable(Tensor(n),
                              requires_grad=False)
-            fake = Variable(Tensor((1 - 0.7) * torch.rand((real_2.size(0), 1, 1, 1, 1)) + 0.7),device=cuda,
+            n = (1 - 0.7) * torch.rand((real_2.size(0), 1, 1, 1, 1)) + 0.7
+            n = torch.Tensor(n, device=cuda)
+            fake = Variable(Tensor(n),
                              requires_grad=False)
 
             #fake = Variable(Tensor(np.zeros((real_2.size(0), 1, 1, 1, 1))),
