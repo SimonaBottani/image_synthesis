@@ -191,7 +191,7 @@ def train_cgan(train_loader, test_loader, output_results,
                 loss_generator = lambda_GAN * loss_GAN + lambda_pixel * loss_pixel
 
                 # Compute the gradient and perform one optimization step
-                if i%16 == 0:
+                if i%2 == 0:
                     loss_generator.backward()
                     optimizer_generator.step()
                     optimizer_generator.zero_grad()
@@ -214,7 +214,7 @@ def train_cgan(train_loader, test_loader, output_results,
             loss_discriminator = 0.5 * (loss_real + loss_fake)
 
             # Compute the gradient and perform one optimization step
-            if i%16 == 0:
+            if i%2 == 0:
                 loss_discriminator.backward()
                 optimizer_discriminator.step()
                 optimizer_discriminator.zero_grad()
