@@ -180,6 +180,7 @@ train_gen = args.train_generator
 
 
 if train_gen == 'train_generator':
+    print('i am training the generator')
     train_gen = True
 else:
     train_gen = False

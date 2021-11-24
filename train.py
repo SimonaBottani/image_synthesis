@@ -138,7 +138,6 @@ def train_cgan(train_loader, test_loader, output_results,
 
     for epoch in range(num_epoch):
         for i, data in enumerate(train_loader, 0):
-            ## Train Generator for the first 100 epoch and discriminator for the others
 
             # Inputs T1-w and T2-w
             real_1 = data["image_1"].type(Tensor)
@@ -175,6 +174,7 @@ def train_cgan(train_loader, test_loader, output_results,
             # -----------------
 
             if train_gen == True:
+                print('generator_update')
 
                 optimizer_generator.zero_grad()
 
