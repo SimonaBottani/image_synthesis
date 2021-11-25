@@ -189,10 +189,12 @@ def train_cgan(train_loader, test_loader, output_results,
 
                 # Total loss
                 loss_generator = lambda_GAN * loss_GAN + lambda_pixel * loss_pixel
+                loss_generator.backward()
 
                 # Compute the gradient and perform one optimization step
-                loss_generator.backward()
-                optimizer_generator.step()
+                if (i+1) % 8 ==0:
+                    optimizer_generator.step()
+                    optimizer_generator.zero_grad()
 
             # ---------------------
             #  Train Discriminator
