@@ -196,7 +196,7 @@ def train_cgan(train_loader, test_loader, output_results,
                     optimizer_generator.step()
 
                     optimizer_generator.zero_grad()
-                    del loss_generator
+                    
 
             # ---------------------
             #  Train Discriminator
