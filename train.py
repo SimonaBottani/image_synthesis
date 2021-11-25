@@ -194,7 +194,9 @@ def train_cgan(train_loader, test_loader, output_results,
                 # Compute the gradient and perform one optimization step
                 if (i+1) % 8 ==0:
                     optimizer_generator.step()
+
                     optimizer_generator.zero_grad()
+                    del loss_generator
 
             # ---------------------
             #  Train Discriminator
