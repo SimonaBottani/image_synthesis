@@ -439,3 +439,26 @@ def load_optimizer(optimizer_path, model):
     name = optimizer_dict["name"]
     optimizer = eval("torch.optim." + name)(filter(lambda x: x.requires_grad, model.parameters()))
     optimizer.load_state_dict(optimizer_dict["optimizer"])
+
+
+def extract_patch_tensor(
+    image_tensor: torch.Tensor,
+    patch_size: int,
+    stride_size: int,
+    patch_index: int,
+    patches_tensor: torch.Tensor = None,
+) -> torch.Tensor:
+    """Extracts a single patch from image_tensor"""
+
+    if patches_tensor is None:
+        patches_tensor = (
+            image_tensor.unfold(1, patch_size, stride_size)
+            .unfold(2, patch_size, stride_size)
+            .unfold(3, patch_size, stride_size)
+            .contiguous()
+        )
+
+        # the dimension of patches_tensor is [1, patch_num1, patch_num2, patch_num3, patch_size1, patch_size2, patch_size3]
+        patches_tensor = patches_tensor.view(-1, patch_size, patch_size, patch_size)
+
+    return patches_tensor[patch_index, ...].unsqueeze_(0).clone()

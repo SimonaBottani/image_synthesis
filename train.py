@@ -180,6 +180,9 @@ def train_cgan(train_loader, test_loader, output_results,
 
                 # GAN loss
                 fake_2 = generator(real_1)  # To complete
+
+
+                ### TODO: create path of fake 2 and real 1
                 pred_fake = discriminator(fake_2, real_1)
 
                 loss_GAN = criterion_GAN(pred_fake, valid) ## change with fake
@@ -205,11 +208,13 @@ def train_cgan(train_loader, test_loader, output_results,
             optimizer_discriminator.zero_grad()
 
             # Real loss
+            ### TODO: create path of real 2 and real 1
             pred_real = discriminator(real_2, real_1)   # To complete
             loss_real = criterion_GAN(pred_real, valid)  # To complete
 
             # Fake loss
             fake_2 = generator(real_1)
+            ### TODO: create path of fake 2 and real 1
             pred_fake = discriminator(fake_2.detach(), real_1)   # To complete
             loss_fake = criterion_GAN(pred_fake, fake)   # To complete
 
