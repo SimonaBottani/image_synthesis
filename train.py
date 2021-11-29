@@ -24,7 +24,7 @@ import sys
 import time
 from models import GeneratorUNet, Discriminator, DiscriminatorCycle, GeneratorUNetResMod
 from evaluation import write_validation_tsv
-from utils import save_checkpoint
+from utils import save_checkpoint, extract_patch_tensor
 # Nibabel
 import nibabel as nib
 
@@ -183,6 +183,10 @@ def train_cgan(train_loader, test_loader, output_results,
 
 
                 ### TODO: create path of fake 2 and real 1
+                print('Extracting the patch')
+
+                fake_2_patch = extract_patch_tensor(fake_2, 64, 10, 0)
+                print(fake_2_patch)
                 pred_fake = discriminator(fake_2, real_1)
 
                 loss_GAN = criterion_GAN(pred_fake, valid) ## change with fake

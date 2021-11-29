@@ -460,5 +460,6 @@ def extract_patch_tensor(
 
         # the dimension of patches_tensor is [1, patch_num1, patch_num2, patch_num3, patch_size1, patch_size2, patch_size3]
         patches_tensor = patches_tensor.view(-1, patch_size, patch_size, patch_size)
+        print(patches_tensor.shape)
 
     return patches_tensor[patch_index, ...].unsqueeze_(0).clone()
