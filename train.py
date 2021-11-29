@@ -184,7 +184,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
                 ### TODO: create path of fake 2 and real 1
                 print('Extracting the patch')
-
+                print(fake_2.shape)
                 fake_2_patch = extract_patch_tensor(fake_2, (1,64,64,64), 10, 0)
                 print(fake_2_patch)
                 pred_fake = discriminator(fake_2, real_1)
