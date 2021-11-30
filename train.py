@@ -180,13 +180,6 @@ def train_cgan(train_loader, test_loader, output_results,
 
                 # GAN loss
                 fake_2 = generator(real_1)  # To complete
-
-
-                ### TODO: create path of fake 2 and real 1
-                print('Extracting the patch')
-                print(fake_2.shape)
-                fake_2_patch = extract_patch_tensor(fake_2[0:,:,:,:], 64, 10, 2)
-                print(fake_2_patch)
                 pred_fake = discriminator(fake_2, real_1)
 
                 loss_GAN = criterion_GAN(pred_fake, valid) ## change with fake
