@@ -183,7 +183,7 @@ def train_cgan(train_loader, test_loader, output_results,
                 fake_2 = generator(real_1)  # To complete
 
                 fake_2_patch = extract_patch_tensor(fake_2[0, :, :, :], 64, 50, index_patch)
-                real_1_patch = extract_patch_tensor(real_1_patch[0, :, :, :], 64, 50, index_patch)
+                real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_patch)
                 fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
                 real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
@@ -216,7 +216,7 @@ def train_cgan(train_loader, test_loader, output_results,
             ### TODO: create path of real 2 and real 1
 
             real_2_patch = extract_patch_tensor(real_2[0, :, :, :], 64, 50, index_patch)
-            real_1_patch = extract_patch_tensor(real_1_patch[0, :, :, :], 64, 50, index_patch)
+            real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_patch)
             real_2_patch = real_2_patch.view(-1, 1, 64, 64, 64)
             real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
@@ -228,7 +228,7 @@ def train_cgan(train_loader, test_loader, output_results,
             ### TODO: create path of fake 2 and real 1
 
             fake_2_patch = extract_patch_tensor(fake_2[0, :, :, :], 64, 50, index_patch)
-            real_1_patch = extract_patch_tensor(real_1_patch[0, :, :, :], 64, 50, index_patch)
+            real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_patch)
             fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
             real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
