@@ -138,6 +138,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
     for epoch in range(num_epoch):
         for i, data in enumerate(train_loader, 0):
+            index_patch = np.random.randint(8)
 
             # Inputs T1-w and T2-w
             real_1 = data["image_1"].type(Tensor)
@@ -180,7 +181,14 @@ def train_cgan(train_loader, test_loader, output_results,
 
                 # GAN loss
                 fake_2 = generator(real_1)  # To complete
-                pred_fake = discriminator(fake_2, real_1)
+
+                fake_2_patch = extract_patch_tensor(fake_2[0, :, :, :], 64, 50, index_patch)
+                real_1_patch = extract_patch_tensor(real_1_patch[0, :, :, :], 64, 50, index_patch)
+                fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
+                real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
+
+
+                pred_fake = discriminator(fake_2_patch, real_1_patch)
 
                 loss_GAN = criterion_GAN(pred_fake, valid) ## change with fake
 
@@ -192,10 +200,10 @@ def train_cgan(train_loader, test_loader, output_results,
                 loss_generator.backward()
 
                 # Compute the gradient and perform one optimization step
-                if (i+1) % 8 ==0:
-                    optimizer_generator.step()
 
-                    optimizer_generator.zero_grad()
+                optimizer_generator.step()
+
+                optimizer_generator.zero_grad()
 
 
             # ---------------------
@@ -206,13 +214,25 @@ def train_cgan(train_loader, test_loader, output_results,
 
             # Real loss
             ### TODO: create path of real 2 and real 1
-            pred_real = discriminator(real_2, real_1)   # To complete
+
+            real_2_patch = extract_patch_tensor(real_2[0, :, :, :], 64, 50, index_patch)
+            real_1_patch = extract_patch_tensor(real_1_patch[0, :, :, :], 64, 50, index_patch)
+            real_2_patch = real_2_patch.view(-1, 1, 64, 64, 64)
+            real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
+
+            pred_real = discriminator(real_2_patch, real_1_patch)   # To complete
             loss_real = criterion_GAN(pred_real, valid)  # To complete
 
             # Fake loss
             fake_2 = generator(real_1)
             ### TODO: create path of fake 2 and real 1
-            pred_fake = discriminator(fake_2.detach(), real_1)   # To complete
+
+            fake_2_patch = extract_patch_tensor(fake_2[0, :, :, :], 64, 50, index_patch)
+            real_1_patch = extract_patch_tensor(real_1_patch[0, :, :, :], 64, 50, index_patch)
+            fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
+            real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
+
+            pred_fake = discriminator(fake_2_patch.detach(), real_1_patch)   # To complete
             loss_fake = criterion_GAN(pred_fake, fake)   # To complete
 
             # Total loss
@@ -220,9 +240,9 @@ def train_cgan(train_loader, test_loader, output_results,
 
             # Compute the gradient and perform one optimization step
             loss_discriminator.backward()
-            if (i + 1) % 8 == 0:
-                optimizer_discriminator.step()
-                optimizer_discriminator.zero_grad()
+
+            optimizer_discriminator.step()
+            optimizer_discriminator.zero_grad()
 
             # --------------
             #  Log Progress

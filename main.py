@@ -26,7 +26,7 @@ import time
 from train import train_cgan, train_generator, train_cyclegan
 from utils import *
 from evaluation import *
-from models import GeneratorUNet, Discriminator, DiscriminatorCycle, GeneratorUNetResMod, R2AttU_Net, AttU_Net, R2U_Net, BTS
+from models import GeneratorUNet, Discriminator, Discriminator64, DiscriminatorCycle, GeneratorUNetResMod, R2AttU_Net, AttU_Net, R2U_Net, BTS
 
 
 
@@ -144,7 +144,12 @@ parser.add_argument(
     help='train generator yes or not '
 )
 
-
+parser.add_argument(
+    '--n_patches',
+    type=int,
+    default=1,
+    help='number of patches'
+)
 
 args = parser.parse_args()
 
@@ -175,6 +180,7 @@ model_generator = args.generator_name
 input_dim = args.input_dim
 generator_pretrained = args.generator_pretrained
 discriminator_pretrained = args.discriminator_pretrained
+n_patches = args.n_patches
 
 train_gen = args.train_generator
 
@@ -319,13 +325,13 @@ for fi in fold_iterator:
 
         if discriminator_pretrained != ['False']:
             print('Loading discriminator')
-            model_discriminator = Discriminator()
+            model_discriminator = Discriminator64()
             param_dict = torch.load(os.path.join(discriminator_pretrained[0], 'fold-0/discriminator/best_loss',
                                              'model_best.pth.tar'), map_location="cpu")
             model_discriminator.load_state_dict(param_dict['model'])
             print('Model discriminator uploaded')
         elif discriminator_pretrained == ['False']:
-            model_discriminator = Discriminator()
+            model_discriminator = Discriminator64()
 
 
 
