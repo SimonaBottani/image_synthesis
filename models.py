@@ -691,7 +691,6 @@ class Discriminator64(nn.Module):
         layers.extend(discriminator_block(in_channels * 2, 32))
         layers.extend(discriminator_block(32, 64))
         layers.extend(discriminator_block(64, 128))
-        layers.extend(discriminator_block(128, 256))
         layers.append(nn.Conv3d(256, 1, 4, padding=0))
         layers.append(nn.AvgPool3d(5))
         self.model = nn.Sequential(*layers)
