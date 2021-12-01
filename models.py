@@ -686,7 +686,7 @@ def discriminator_block(in_filters, out_filters):
 
 class Discriminator64(nn.Module):
     def __init__(self, in_channels=1):
-        super(Discriminator, self).__init__()
+        super(Discriminator64, self).__init__()
         layers = []
         layers.extend(discriminator_block(in_channels * 2, 32))
         layers.extend(discriminator_block(32, 64))
