@@ -7,7 +7,7 @@ from torch.autograd import Variable
 
 # torchsummary and torchvision
 #from torchsummary import summary
-from torchvision.utils import save_image
+#from torchvision.utils import save_image
 
 # matplotlib stuff
 import matplotlib.pyplot as plt
@@ -189,11 +189,9 @@ def train_cgan(train_loader, test_loader, output_results,
                     fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
                     real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
-
                     pred_fake = discriminator(fake_2_patch, real_1_patch)
+                    loss_GAN = loss_GAN + torch.mean((pred_fake - valid) ** 2) ## change with fake
 
-
-                    loss_GAN = loss_GAN + (criterion_GAN(pred_fake, valid)) ## change with fake
                 loss_GAN = loss_GAN / 8
 
                 # L1 loss
@@ -227,7 +225,8 @@ def train_cgan(train_loader, test_loader, output_results,
                 real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
                 pred_real = discriminator(real_2_patch, real_1_patch)   # To complete
-                loss_real = loss_real + criterion_GAN(pred_real, valid)# To complete
+                #loss_real = loss_real + criterion_GAN(pred_real, valid)# To complete
+                loss_real = loss_real + torch.mean((pred_real-valid)**2)
             loss_real = loss_real/8
 
             # Fake loss
@@ -241,8 +240,8 @@ def train_cgan(train_loader, test_loader, output_results,
                 fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
                 real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
-                pred_fake = discriminator(fake_2_patch.detach(), real_1_patch)   # To complete
-                loss_fake = loss_fake + criterion_GAN(pred_fake, fake)  # To complete
+                pred_fake = discriminator(fake_2_patch.detach(), real_1_patch)
+                loss_fake = loss_fake + torch.mean((pred_fake-fake)**2)  # To complete
             loss_fake = loss_fake / 8
             # Total loss
             loss_discriminator = 0.5 * (loss_real + loss_fake)
