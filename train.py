@@ -182,15 +182,18 @@ def train_cgan(train_loader, test_loader, output_results,
                 # GAN loss
                 fake_2 = generator(real_1)  # To complete
 
-                fake_2_patch = extract_patch_tensor(fake_2[0, :, :, :], 64, 50, index_patch)
-                real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_patch)
-                fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
-                real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
+                loss_GAN = []
+                for index_ in range(8):
+                    fake_2_patch = extract_patch_tensor(fake_2[0, :, :, :], 64, 50, index_)
+                    real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_)
+                    fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
+                    real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
 
-                pred_fake = discriminator(fake_2_patch, real_1_patch)
+                    pred_fake = discriminator(fake_2_patch, real_1_patch)
 
-                loss_GAN = criterion_GAN(pred_fake, valid) ## change with fake
+                    loss_GAN.append(torch.lstsq(pred_fake, valid)) ## change with fake
+                loss_GAN = np.mean(loss_GAN)
 
                 # L1 loss
                 loss_pixel = criterion_pixelwise(fake_2, real_2)
@@ -214,27 +217,32 @@ def train_cgan(train_loader, test_loader, output_results,
 
             # Real loss
             ### TODO: create path of real 2 and real 1
+            loss_real = []
+            for index_ in range(8):
 
-            real_2_patch = extract_patch_tensor(real_2[0, :, :, :], 64, 50, index_patch)
-            real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_patch)
-            real_2_patch = real_2_patch.view(-1, 1, 64, 64, 64)
-            real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
+                real_2_patch = extract_patch_tensor(real_2[0, :, :, :], 64, 50, index_)
+                real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_)
+                real_2_patch = real_2_patch.view(-1, 1, 64, 64, 64)
+                real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
-            pred_real = discriminator(real_2_patch, real_1_patch)   # To complete
-            loss_real = criterion_GAN(pred_real, valid)  # To complete
+                pred_real = discriminator(real_2_patch, real_1_patch)   # To complete
+                loss_real.append(torch.lstsq(pred_real, valid))# To complete
+            loss_real = np.mean(loss_real)
 
             # Fake loss
             fake_2 = generator(real_1)
+
+            loss_fake = []
             ### TODO: create path of fake 2 and real 1
+            for index_ in range(8):
+                fake_2_patch = extract_patch_tensor(fake_2[0, :, :, :], 64, 50, index_)
+                real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_)
+                fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
+                real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
-            fake_2_patch = extract_patch_tensor(fake_2[0, :, :, :], 64, 50, index_patch)
-            real_1_patch = extract_patch_tensor(real_1[0, :, :, :], 64, 50, index_patch)
-            fake_2_patch = fake_2_patch.view(-1, 1, 64, 64, 64)
-            real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
-
-            pred_fake = discriminator(fake_2_patch.detach(), real_1_patch)   # To complete
-            loss_fake = criterion_GAN(pred_fake, fake)   # To complete
-
+                pred_fake = discriminator(fake_2_patch.detach(), real_1_patch)   # To complete
+                loss_fake.append(torch.lstsq(pred_fake, fake))  # To complete
+            loss_fake = np.mean(loss_fake)
             # Total loss
             loss_discriminator = 0.5 * (loss_real + loss_fake)
 

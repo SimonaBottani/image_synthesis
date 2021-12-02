@@ -463,3 +463,8 @@ def extract_patch_tensor(
 
 
     return patches_tensor[patch_index, ...].unsqueeze_(0).clone()
+
+
+
+## create loss
+
