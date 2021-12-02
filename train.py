@@ -193,7 +193,7 @@ def train_cgan(train_loader, test_loader, output_results,
                     pred_fake = discriminator(fake_2_patch, real_1_patch)
 
                     loss_GAN.append(criterion_GAN(pred_fake, valid)) ## change with fake
-                loss_GAN = np.mean(loss_GAN)
+                loss_GAN = torch.mean(loss_GAN)
 
                 # L1 loss
                 loss_pixel = criterion_pixelwise(fake_2, real_2)
@@ -227,7 +227,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
                 pred_real = discriminator(real_2_patch, real_1_patch)   # To complete
                 loss_real.append(criterion_GAN(pred_real, valid))# To complete
-            loss_real = np.mean(loss_real)
+            loss_real = torch.mean(loss_real)
 
             # Fake loss
             fake_2 = generator(real_1)
@@ -242,7 +242,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
                 pred_fake = discriminator(fake_2_patch.detach(), real_1_patch)   # To complete
                 loss_fake.append(criterion_GAN(pred_fake, fake))  # To complete
-            loss_fake = np.mean(loss_fake)
+            loss_fake = torch.mean(loss_fake)
             # Total loss
             loss_discriminator = 0.5 * (loss_real + loss_fake)
 
