@@ -192,7 +192,7 @@ def train_cgan(train_loader, test_loader, output_results,
 
                     pred_fake = discriminator(fake_2_patch, real_1_patch)
 
-                    loss_GAN.append(torch.lstsq(pred_fake, valid)) ## change with fake
+                    loss_GAN.append(loss_GAN(pred_fake, valid)) ## change with fake
                 loss_GAN = np.mean(loss_GAN)
 
                 # L1 loss
@@ -226,7 +226,7 @@ def train_cgan(train_loader, test_loader, output_results,
                 real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
                 pred_real = discriminator(real_2_patch, real_1_patch)   # To complete
-                loss_real.append(torch.lstsq(pred_real, valid))# To complete
+                loss_real.append(loss_GAN(pred_real, valid))# To complete
             loss_real = np.mean(loss_real)
 
             # Fake loss
@@ -241,7 +241,7 @@ def train_cgan(train_loader, test_loader, output_results,
                 real_1_patch = real_1_patch.view(-1, 1, 64, 64, 64)
 
                 pred_fake = discriminator(fake_2_patch.detach(), real_1_patch)   # To complete
-                loss_fake.append(torch.lstsq(pred_fake, fake))  # To complete
+                loss_fake.append(loss_GAN(pred_fake, fake))  # To complete
             loss_fake = np.mean(loss_fake)
             # Total loss
             loss_discriminator = 0.5 * (loss_real + loss_fake)
