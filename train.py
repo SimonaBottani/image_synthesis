@@ -322,8 +322,8 @@ def train_cgan(train_loader, test_loader, output_results,
             loss_valid = write_validation_tsv(epoch, train_loader, output_results, generator, criterion_pixelwise,
                                               128)
 
-            loss_is_best = loss_valid < best_valid_loss
-            best_valid_loss = min(loss_valid, best_valid_loss)
+            loss_is_best = loss_pixel.item() < best_valid_loss
+            best_valid_loss = min(loss_pixel.item(), best_valid_loss)
 
             save_checkpoint({'model': generator.state_dict(),
                              'epoch': epoch,
@@ -535,8 +535,8 @@ def train_generator(train_loader, test_loader, output_results,
         loss_valid = write_validation_tsv(epoch, test_loader, output_results, generator, criterion,
                                           input_dim)
 
-        loss_is_best = loss_valid < best_valid_loss
-        best_valid_loss = min(loss_valid, best_valid_loss)
+        loss_is_best = loss.item() < best_valid_loss
+        best_valid_loss = min(loss_valid, loss.item())
 
         save_checkpoint({'model': generator.state_dict(),
                          'epoch': epoch,
