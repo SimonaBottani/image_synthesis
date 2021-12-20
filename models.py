@@ -1155,7 +1155,8 @@ class TransformerBTS(nn.Module):
 
         return x
 
-## num_classes = 1
+## Bts inspired from https://github.com/Wenxuan-1119/TransBTS
+
 class BTS(TransformerBTS):
     def __init__(
         self,
